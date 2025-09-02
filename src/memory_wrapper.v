@@ -14,6 +14,7 @@ module memory_wrapper #(
 );
 
 reg [32-1:0] mem [0:NUM_WORDS-1];
+
 integer i;
 initial begin
     // INIT_BY: 0-none, 1-inst.txt, 2-data.txt
@@ -42,5 +43,12 @@ always@(posedge clk)begin
         mem[addr] <= data_i;
     end
 end
+
+wire [32-1:0] word_0, word_1, word_2, word_3, word_4;
+assign word_0 = mem[0];
+assign word_1 = mem[1];
+assign word_2 = mem[2];
+assign word_3 = mem[3];
+assign word_4 = mem[4];
 
 endmodule
