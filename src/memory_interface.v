@@ -1,7 +1,7 @@
 module memory_interface #(
     parameter INIT_BY = 1,
     parameter CONTENT_WIDTH = 32,
-    parameter CONTENT_ADDR_WIDTH = 7
+    parameter CONTENT_ADDR_WIDTH = 32
 )(
     input wire clk,
     input wire rst_n,

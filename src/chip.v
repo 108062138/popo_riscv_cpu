@@ -133,6 +133,6 @@ always@(posedge clk)begin
 end
 always@(posedge clk)begin
     // demo status
-    $display("cycle: %d, inst_addr: %d, inst: %h", cnt, inst_addr_core2mem, fetch_inst);
+    $display("cycle: %d, inst_addr: %d, inst: %h, request: ", cnt, inst_addr_core2mem, fetch_inst, inst_request_core2mem);
 end
 endmodule

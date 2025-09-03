@@ -1,7 +1,7 @@
 module memory_wrapper #(
     parameter INIT_BY = 0,
     parameter DATA_WIDTH = 32,
-    parameter ADDR_WIDTH = 7,
+    parameter ADDR_WIDTH = 32,
     parameter NUM_WORDS = 128
 )(
     input wire clk,
@@ -24,16 +24,16 @@ end
 
 always@(posedge clk)begin
     if(!rst_n)begin
-        data_o <= 32'hDEAD_BEEF;
+        data_o <= 0;//32'hDEAD_BEEF;
     end else begin
         if(request)begin
             if(we)begin // store
-                data_o <= 32'hDEAD_BEEF;
+                data_o <= 0;//32'hDEAD_BEEF;
             end else begin // load
                 data_o <= mem[addr];
             end
         end else begin
-            data_o <= 32'h1234_5678;
+            data_o <= 0;//32'h1234_5678;
         end
     end
 end
