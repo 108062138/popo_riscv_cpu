@@ -23,7 +23,7 @@ memory_wrapper  #(
     .INIT_BY(INIT_BY),
     .DATA_WIDTH(CONTENT_WIDTH),
     .ADDR_WIDTH(CONTENT_ADDR_WIDTH),
-    .NUM_WORDS(1<<CONTENT_ADDR_WIDTH)
+    .NUM_WORDS(128/*1<<CONTENT_ADDR_WIDTH*/)
 ) u_mem(
     .clk(clk),
     .rst_n(rst_n),

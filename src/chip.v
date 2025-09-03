@@ -68,9 +68,9 @@
 
 module chip #(
     parameter INST_WIDTH = 32,
-    parameter INST_ADDR_WIDTH = 7,
+    parameter INST_ADDR_WIDTH = 32,
     parameter DATA_WIDTH = 32,
-    parameter DATA_ADDR_WIDTH = 7
+    parameter DATA_ADDR_WIDTH = 32
 )(
     input wire clk,
     input wire rst_n,
@@ -133,6 +133,6 @@ always@(posedge clk)begin
 end
 always@(posedge clk)begin
     // demo status
-    $display("cycle: %d, inst_addr: %d, inst: %h, request: ", cnt, inst_addr_core2mem, fetch_inst, inst_request_core2mem);
+    $display("cycle: %d, inst_addr: %d, inst: %h, request: %h and valid: %h", cnt, inst_addr_core2mem, fetch_inst, inst_request_core2mem, inst_valid);
 end
 endmodule

@@ -4,9 +4,9 @@ module tb();
     parameter CYC = 10;
     parameter max_cyc = 30;
     parameter INST_WIDTH = 32;
-    parameter INST_ADDR_WIDTH = 7;
+    parameter INST_ADDR_WIDTH = 32;
     parameter DATA_WIDTH = 32;
-    parameter DATA_ADDR_WIDTH = 7;
+    parameter DATA_ADDR_WIDTH = 32;
 
     reg clk;
     reg rst_n;

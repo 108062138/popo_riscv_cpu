@@ -18,28 +18,14 @@
 .global main
 
 main:
-    # psum = 10
-    addi t2, x0, 10
-    
-    # for(int i=0; i<3; i=i+1)
-    # i=0
-    addi t0, x0, 0
-    # loop bound = 3
-    addi t1, x0, 3
-
+    addi t2, x0, 10       # 00a00393 addr 0 0
+    addi t0, x0, 0        # 00000293 addr 1 4
+    addi t1, x0, 3        # 00300313 addr 2 8
 loop_condition:
-    # if (i >= 3) break;
-    bge t0, t1, loop_end
-
-    # psum = psum + i;
-    add t2, t2, t0
-
-    # i = i + 1;
-    addi t0, t0, 1
-
-    # jump back to the condition check
-    j loop_condition
-
+    bge t0, t1, loop_end  # 0062d863 addr 3 12
+    add t2, t2, t0        # 005383b3 addr 4 16
+    addi t0, t0, 1        # 00128293 addr 5 20
+    j loop_condition      # ff5ff06f addr 6 24
 loop_end:
-    # res = psum;
-    addi s0, t2, 0
+    addi s0, t2, 0        # 00038413 addr 7 28
+    add s0, s0, s0        # 00840433 addr 8 32

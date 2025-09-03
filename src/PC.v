@@ -12,7 +12,8 @@ module PC_handler #(
     input wire [INST_ADDR_WIDTH-1:0] IF_PC_plus_4,
     output wire inst_we_core2mem,
     output wire inst_request_core2mem,
-    output reg [INST_ADDR_WIDTH-1:0] PC
+    output reg [INST_ADDR_WIDTH-1:0] PC,
+    output reg [INST_ADDR_WIDTH-1:0] pre_PC
 );
 
 localparam IDLE = 0;
@@ -59,9 +60,11 @@ always@(posedge clk)begin
     if(!rst_n) begin
         cpu_state <= IDLE;
         PC <= 0;
+        pre_PC <= PC;
     end else begin
         cpu_state <= n_cpu_state;
         PC <= n_PC;
+        pre_PC <= PC;
     end
 end
 

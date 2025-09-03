@@ -87,13 +87,14 @@ wire branch_source;
 wire [INST_ADDR_WIDTH-1:0] branch_jalr_target;
 wire [INST_ADDR_WIDTH-1:0] branch_jal_beq_bne_target;
 wire [INST_ADDR_WIDTH-1:0] PC_from_PC;
+wire [INST_ADDR_WIDTH-1:0] pre_PC_from_PC;
 
 wire [INST_WIDTH-1:0] IF_inst_o;
 wire [INST_ADDR_WIDTH-1:0] IF_PC_o;
 wire [INST_ADDR_WIDTH-1:0] IF_PC_plus_4_o;
 
 assign inst_addr_core2mem = PC_from_PC >> 2; // PC is byte address, but inst mem is word address
-
+assign stall_PC = !inst_valid_mem2core; // stall when inst is not valid
 PC_handler #(
     .INST_ADDR_WIDTH(INST_ADDR_WIDTH)
 ) u_PC_handler(
@@ -108,7 +109,8 @@ PC_handler #(
     .IF_PC_plus_4(IF_PC_plus_4_o),
     .inst_we_core2mem(inst_we_core2mem),
     .inst_request_core2mem(inst_request_core2mem),
-    .PC(PC_from_PC)
+    .PC(PC_from_PC),
+    .pre_PC(pre_PC_from_PC)
 );
 
 IF_datapath #(
@@ -127,7 +129,7 @@ reg [INST_WIDTH-1:0] inst_IF_ID;
 reg [INST_ADDR_WIDTH-1:0] PC_IF_ID;
 always@(posedge clk)begin
     inst_IF_ID <= IF_inst_o;
-    PC_IF_ID <= IF_PC_o;
+    PC_IF_ID <= pre_PC_from_PC;
 end
 
 branch_handler #(

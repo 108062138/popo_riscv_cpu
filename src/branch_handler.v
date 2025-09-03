@@ -12,8 +12,8 @@ module branch_handler #(
     input wire [INST_ADDR_WIDTH-1:0] PC_IF_ID,
     output reg branch_taken, // 0-> not take, so PC+4; 1-> take, so branch_target
     output reg branch_source, // 0-> from pc_if_id+offset, 1: s2 + inst_if_id_offset
-    output reg [INST_WIDTH-1:0] branch_jalr_target,
-    output reg [INST_WIDTH-1:0] branch_jal_beq_bne_target
+    output reg [INST_ADDR_WIDTH-1:0] branch_jalr_target,
+    output reg [INST_ADDR_WIDTH-1:0] branch_jal_beq_bne_target
 );
 
 wire [7-1:0] opcode;
@@ -28,10 +28,12 @@ reg [3:0] cnt;
 
 assign opcode = inst_IF_ID[6:0];
 assign funct3 = inst_IF_ID[14:12];
-assign is_branch_inst = (opcode[6:5] == 2'b11)? 1'b1: 1'b0; // jal, jalr, beq, bne, blt, bge, bltu, bgeu 
+assign is_branch_inst = (opcode == 7'b1101111) || // jal
+                        (opcode == 7'b1100111) || // jalr
+                        (opcode == 7'b1100011); // B type
 assign imm_for_jal = {{12{inst_IF_ID[31]}}, inst_IF_ID[19:12], inst_IF_ID[20], inst_IF_ID[30:21], 1'b0};
 assign imm_for_jalr = {{20{inst_IF_ID[31]}}, inst_IF_ID[31:20]};
-assign imm_for_beq = {/*{20{inst_IF_ID[31]}},*/ inst_IF_ID[7], inst_IF_ID[30:25], inst_IF_ID[11:8], 1'b0};
+assign imm_for_beq = {{20{inst_IF_ID[31]}}, inst_IF_ID[7], inst_IF_ID[30:25], inst_IF_ID[11:8], 1'b0};
 
 always@(*)begin
     branch_taken = 0;
@@ -46,16 +48,16 @@ always@(*)begin
                 branch_taken = 1;
                 if(inst_IF_ID[3])begin // jal
                     branch_source = 0;
-                    branch_jal_beq_bne_target = PC_IF_ID + {{12{inst_IF_ID[31]}}, inst_IF_ID[19:12], inst_IF_ID[20], inst_IF_ID[30:21], 1'b0};
+                    branch_jal_beq_bne_target = $signed($signed(PC_IF_ID) + $signed(imm_for_jal));
                 end else begin // jalr
                     branch_source = 1;
-                    branch_jalr_target = 4/*rs1*/ + {{20{inst_IF_ID[31]}}, inst_IF_ID[31:20]};
+                    branch_jalr_target = $signed($signed(4)/*rs1*/ + $signed(imm_for_jalr));
                 end
             end else begin
                 branch_source = 0;
-                branch_jal_beq_bne_target = PC_IF_ID + {{20{inst_IF_ID[31]}}, inst_IF_ID[7], inst_IF_ID[30:25], inst_IF_ID[11:8], 1'b0};
+                branch_jal_beq_bne_target = $signed($signed(PC_IF_ID) + $signed(imm_for_beq));
                 if(cnt[0] == 1)begin
-                    branch_taken = 1;
+                    branch_taken = 0;
                 end else begin
                     branch_taken = 0;
                 end
