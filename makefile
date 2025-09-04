@@ -1,28 +1,37 @@
 export CORE_ROOT=$(shell pwd)
 # ==== Config ====
-TB_FILE   := tb/tb.sv
-SRCS      := $(wildcard src/*.v)
-AXI_SRCS  := $(wildcard src/axi/*.v)
-BUILD     := obj_dir
-SIM_OUT   := $(BUILD)/Vtb
-VCD_FILE  := cpu_tb.vcd
+CHIP_TB_FILE   	:= tb/tb_chip.sv
+AXI_TB_FILE    	:= tb/tb_axi.sv
+SRCS      		:= $(wildcard src/*.v)
+AXI_SRCS  		:= $(wildcard src/axi/*.v)
+BUILD     		:= obj_dir
+SIM_CHIP  		:= $(BUILD)/Vtb_chip
+SIM_AXI         := $(BUILD)/Vtb_axi
 
-.PHONY: all run sim clean
+.PHONY: all run sim_chip clean sim_axi
 
 all: run
 
-$(SIM_OUT): $(TB_FILE) $(SRCS) | $(BUILD)
+$(SIM_CHIP): $(CHIP_TB_FILE) $(SRCS) | $(BUILD)
 	@echo "[VERILATOR] Compile -> $@"
-	verilator --trace-vcd --binary -j 32 --top-module tb $(TB_FILE) $(SRCS)
+	verilator --trace-vcd --binary -j 32 --top-module tb_chip $(CHIP_TB_FILE) $(SRCS)
+
+$(SIM_AXI): $(AXI_TB_FILE) $(AXI_SRCS) | $(BUILD)
+	@echo "[VERILATOR] Compile -> $@"
+	verilator --trace-vcd --binary -j 32 -Wall --top-module tb_axi $(AXI_TB_FILE) $(AXI_SRCS)
 
 $(BUILD):
 	@mkdir -p $(BUILD)
 
-sim: $(SIM_OUT)
-	@echo "[VVP] Run -> ./$(SIM_OUT)"
-	./$(SIM_OUT)
-	
-run: sim
+sim_chip: $(SIM_CHIP)
+	@echo "[VVP] Run -> ./$(SIM_CHIP)"
+	./$(SIM_CHIP)
+
+sim_axi: $(SIM_AXI)
+	@echo "[VVP] Run -> ./$(SIM_AXI)"
+	./$(SIM_AXI)
+
+run: sim_chip
 
 clean:
 	@echo "[CLEAN]"
