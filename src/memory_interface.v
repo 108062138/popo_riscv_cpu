@@ -13,6 +13,11 @@ module memory_interface #(
     output wire [CONTENT_WIDTH-1:0] data_o
 );
 
+reg [2-1:0] cd;
+always@(posedge clk)begin
+    if(!rst_n) cd <= 0;
+    else cd <= cd + 1;
+end
 always@(posedge clk)begin
     if(!rst_n) valid <= 0;
     else if(request) valid <= 1;

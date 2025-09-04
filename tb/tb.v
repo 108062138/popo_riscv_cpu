@@ -2,7 +2,7 @@
 
 module tb();
     parameter CYC = 10;
-    parameter max_cyc = 30;
+    parameter max_cyc = 60;
     parameter INST_WIDTH = 32;
     parameter INST_ADDR_WIDTH = 32;
     parameter DATA_WIDTH = 32;
@@ -31,7 +31,7 @@ module tb();
 
     // dump
     initial begin
-        $dumpfile("./build/cpu_tb.vcd");
+        $dumpfile("cpu_tb.vcd");
         $dumpvars(0, tb);
     end
 

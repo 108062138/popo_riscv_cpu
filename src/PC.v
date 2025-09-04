@@ -3,7 +3,7 @@ module PC_handler #(
 )(
     input wire clk,
     input wire rst_n,
-    input wire start, // used to interrupt the cpu
+    input wire start,
     input wire stall_PC,
     input wire branch_taken, // 0-> not take, so PC+4; 1-> take, so branch_target
     input wire branch_source, // 0-> from pc+offset, 1: s2 + offset
