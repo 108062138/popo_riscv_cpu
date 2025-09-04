@@ -1,6 +1,6 @@
 export CORE_ROOT=$(shell pwd)
 # ==== Config ====
-TB_FILE   := tb/tb.v
+TB_FILE   := tb/tb.sv
 SRCS      := $(wildcard src/*.v)
 AXI_SRCS  := $(wildcard src/axi/*.v)
 BUILD     := obj_dir
@@ -19,8 +19,9 @@ $(BUILD):
 	@mkdir -p $(BUILD)
 
 sim: $(SIM_OUT)
-	@echo "[VVP] Run -> $(SIM_OUT)"
-
+	@echo "[VVP] Run -> ./$(SIM_OUT)"
+	./$(SIM_OUT)
+	
 run: sim
 
 clean:
