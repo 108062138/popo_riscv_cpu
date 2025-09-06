@@ -18,7 +18,7 @@ $(SIM_CHIP): $(CHIP_TB_FILE) $(SRCS) | $(BUILD)
 
 $(SIM_AXI): $(AXI_TB_FILE) $(AXI_SRCS) | $(BUILD)
 	@echo "[VERILATOR] Compile -> $@"
-	verilator --trace-vcd --binary -j 32 -Wall --top-module tb_axi $(AXI_TB_FILE) $(AXI_SRCS)
+	verilator --trace-vcd --binary -j 32 -Wno-EOFNEWLINE --top-module tb_axi $(AXI_TB_FILE) $(AXI_SRCS)
 
 $(BUILD):
 	@mkdir -p $(BUILD)
