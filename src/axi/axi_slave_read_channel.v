@@ -57,7 +57,7 @@ end
 // AR comb. for handshaking signals
 always@(*)begin
     ARREADY = 1;
-    if(state==transmit) ARREADY = 0;
+    if(state!=idle) ARREADY = 0;
 end
 
 // R comb. for handshaking signals

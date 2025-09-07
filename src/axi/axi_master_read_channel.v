@@ -39,7 +39,7 @@ wire beat_raddr, beat_rdata;
 
 assign beat_raddr = (ARVALID && ARREADY);
 assign beat_rdata = (RVALID && RREADY);
-assign done = (state==raise_done); //(RVALID && RREADY && RLAST);
+assign done = (state==raise_done);
 
 // just to immitate rcving data buffer condition
 lfsr_6 u_lfsr_6(.clk(clk), .rst_n(rst_n), .lfsr_out(lfsr_out));

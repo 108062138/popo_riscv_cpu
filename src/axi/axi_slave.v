@@ -1,7 +1,9 @@
 module axi_slave #(
     parameter ADDR_WIDTH = 32,
-    parameter READ_CHANNEL_WIDTH = 4, // 4 bit per read beat
-    parameter READ_BURST_LEN = 8
+    parameter READ_CHANNEL_WIDTH = 32, // 32 bit per read beat
+    parameter READ_BURST_LEN = 8,
+    parameter WRITE_CHANNEL_WIDTH = 32, // 32 bit per burst
+    parameter WRITE_BURST_LEN = 8
 )(
     input wire clk,
     input wire rst_n,
@@ -19,8 +21,22 @@ module axi_slave #(
     output wire [1:0] RRESP,
     input wire RREADY
 
-    // write control:
-    // TBD
+    // write address channel
+    output wire AWREADY,
+    input wire [ADDR_WIDTH-1:0] AWADDR,
+    input wire AWVALID,
+    input wire [WRITE_BURST_LEN-1:0] AWLEN,
+    input wire [2:0] AWSIZE,
+    input wire [1:0] AWBURST,
+    // write data channel
+    output wire WREADY,
+    input wire WVALID,
+    input wire [WRITE_CHANNEL_WIDTH-1:0] WDATA,
+    input wire WLAST,
+    // write responce channel
+    input wire BREADY,
+    output wire BRESP,
+    output wire BVALID
 );
 
 axi_slave_read_channel #(
@@ -43,6 +59,31 @@ axi_slave_read_channel #(
     .RLAST(RLAST),
     .RRESP(RRESP),
     .RREADY(RREADY)
+);
+
+axi_slave_write_channel #(
+    .ADDR_WIDTH(ADDR_WIDTH),
+    .WRITE_CHANNEL_WIDTH(WRITE_CHANNEL_WIDTH),
+    .WRITE_BURST_LEN(WRITE_BURST_LEN)
+) u_axi_slave_write_channel (
+    .clk(clk),
+    .rst_n(rst_n),
+    // write address channel
+    .AWREADY(AWREADY),
+    .AWADDR(AWADDR),
+    .AWVALID(AWVALID),
+    .AWLEN(AWLEN),
+    .AWSIZE(AWSIZE),
+    .AWBURST(AWBURST),
+    // write data channel
+    .WREADY(WREADY),
+    .WVALID(WVALID),
+    .WDATA(WDATA),
+    .WLAST(WLAST),
+    // write responce channel
+    .BREADY(BREADY),
+    .BRESP(BRESP),
+    .BVALID(BVALID)
 );
 
 endmodule
