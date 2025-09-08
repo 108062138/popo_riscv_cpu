@@ -215,7 +215,7 @@ fork
         rpull = 0;
         wait(start_test_2 && i>test_2_size-6);
         for(j=0;j<test_2_size+read_more;j=j+1)begin
-            wait(!rempty);
+            while (rempty) @(posedge rclk);
             @(negedge rclk);
             if(!rempty)begin
                 rpull = 1;
