@@ -31,8 +31,8 @@ module tb_chip();
 
     // dump
     initial begin
-        $dumpfile("cpu_tb.vcd");
-        $dumpvars(0, tb);
+        $dumpfile("tb_chip.vcd");
+        $dumpvars(0, tb_chip);
     end
 
     initial begin

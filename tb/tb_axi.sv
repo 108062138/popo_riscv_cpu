@@ -13,8 +13,8 @@ module tb_axi();
     end
 
     initial begin
-        $dumpfile("axi_tb.vcd");
-        $dumpvars(0, tb);
+        $dumpfile("tb_axi.vcd");
+        $dumpvars(0, tb_axi);
     end
 
     initial begin
