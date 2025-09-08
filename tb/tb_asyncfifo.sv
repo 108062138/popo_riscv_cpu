@@ -1,4 +1,9 @@
 `timescale 1ps/1ps
+
+/*
+    in this module, I test concurrent read/write, over write then read, over read
+*/
+
 module tb_asyncfifo();
 
 parameter max_cyc =1400;
@@ -69,7 +74,7 @@ initial begin
     test_keep_write_and_read(2);
     $display("✅ pass test 1: write and keep read");
     i = 0; j = 0; test_2_size = 20;
-    test_fill_fifo_first_then_read_and_write(20);
+    test_fill_fifo_first_then_read_and_write(20, 0); // change second parameter to test over read
     $display("✅ pass test 2: write and keep read");
 end
 
@@ -184,6 +189,7 @@ endtask
 event test_fill_fifo_first_then_read_and_write_done;
 task test_fill_fifo_first_then_read_and_write;
 input integer offset;
+input integer read_more;
 fork
     begin
         wpush = 0;
@@ -208,7 +214,8 @@ fork
     begin
         rpull = 0;
         wait(start_test_2 && i>test_2_size-6);
-        for(j=0;j<test_2_size;j=j+1)begin
+        for(j=0;j<test_2_size+read_more;j=j+1)begin
+            wait(!rempty);
             @(negedge rclk);
             if(!rempty)begin
                 rpull = 1;
