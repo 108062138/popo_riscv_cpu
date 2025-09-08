@@ -23,9 +23,9 @@ $(SIM_AXI): $(AXI_TB_FILE) $(AXI_SRCS) | $(BUILD)
 	@echo "[VERILATOR] Compile -> $@"
 	verilator --trace-vcd --binary -j 32 -Wno-EOFNEWLINE --top-module tb_axi $(AXI_TB_FILE) $(AXI_SRCS) $(ASYNCFIFO_SRCS)
 
-$(SIM_ASYNCFIFO): tb/tb_asyncfifo.sv $(ASYNCFIFO_SRCS) | $(BUILD)
+$(SIM_ASYNCFIFO): tb/tb_asyncfifo.sv tb/fifo_if.sv $(ASYNCFIFO_SRCS) | $(BUILD)
 	@echo "[VERILATOR] Compile -> $@"
-	verilator --trace-vcd --binary -j 32 -Wno-EOFNEWLINE -Wno-WIDTHEXPAND --top-module tb_asyncfifo tb/tb_asyncfifo.sv $(ASYNCFIFO_SRCS)
+	verilator --trace-vcd --binary -j 32 -Wno-EOFNEWLINE -Wno-WIDTHEXPAND --top-module tb_asyncfifo tb/tb_asyncfifo.sv tb/fifo_if.sv $(ASYNCFIFO_SRCS)
 
 $(BUILD):
 	@mkdir -p $(BUILD)
