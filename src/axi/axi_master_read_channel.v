@@ -23,7 +23,11 @@ module axi_master_read_channel #(
     input wire [READ_CHANNEL_WIDTH-1:0] RDATA,
     input wire RLAST,
     input wire [1:0] RRESP,
-    output reg RREADY
+    output reg RREADY,
+    // master 2 dma fifo
+    output reg master2dma_afifo_wpush,
+    output reg [READ_CHANNEL_WIDTH-1:0] master2dma_afifo_wdata,
+    input wire master2dma_afifo_wfull
 );
 
 localparam idle = 0;
@@ -59,11 +63,14 @@ end
 // R comb. for handshaking signals
 always@(*)begin
     RREADY = 1'b0;
+    master2dma_afifo_wpush = 1'b0;
+    master2dma_afifo_wdata = 0;
     if(state == data_handshaking)begin
-        // RREADY independent of RVALID
-        if(lfsr_out/*RVALID*/) RREADY = 1'b1;
-        // RREADY dependent of RVALID
-        // if(lfsr_out && RVALID) RREADY = 1'b1;
+        if(RVALID && !master2dma_afifo_wfull)begin
+            RREADY = 1'b1;
+            master2dma_afifo_wpush = 1;
+            master2dma_afifo_wdata = RDATA;
+        end
     end
 end
 

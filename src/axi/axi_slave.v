@@ -19,7 +19,7 @@ module axi_slave #(
     output wire [READ_CHANNEL_WIDTH-1:0] RDATA,
     output wire RLAST,
     output wire [1:0] RRESP,
-    input wire RREADY
+    input wire RREADY,
 
     // write address channel
     output wire AWREADY,

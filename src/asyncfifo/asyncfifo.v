@@ -2,14 +2,14 @@ module asyncfifo #(
     parameter DATA_WIDTH = 32,
     parameter ADDR_WIDTH = 4
 )(
-    input wire rpull,
     input wire rclk,
     input wire rrst_n,
+    input wire rpull,
     output wire rempty,
     output wire [DATA_WIDTH-1:0] rdata,
-    input wire wpush,
     input wire wclk,
     input wire wrst_n,
+    input wire wpush,
     output wire wfull,
     input wire [DATA_WIDTH-1:0] wdata
 );

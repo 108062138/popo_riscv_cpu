@@ -4,7 +4,7 @@ module axi_master #(
     parameter READ_CHANNEL_WIDTH = 32, // 32 bit per beat
     parameter READ_BURST_LEN = 8,
     parameter WRITE_CHANNEL_WIDTH = 32, // 32 bit per beat
-    parameter WRITE_BURST_LEN = 8,
+    parameter WRITE_BURST_LEN = 8
 )(
     input wire clk,
     input wire rst_n,
@@ -25,15 +25,16 @@ module axi_master #(
     input wire [READ_CHANNEL_WIDTH-1:0] RDATA,
     input wire RLAST,
     input wire [1:0] RRESP,
-    output wire RREADY
+    output wire RREADY,
+    // master 2 dma fifo
+    output wire master2dma_afifo_wpush,
+    output wire [READ_CHANNEL_WIDTH-1:0] master2dma_afifo_wdata,
+    input wire master2dma_afifo_wfull,
     
     // write control:
     input wire start_write,
     input wire [ADDR_WIDTH-1:0] target_write_addr,
     input wire [WRITE_BURST_LEN-1:0] target_write_burst_len,
-    input wire [WRITE_CHANNEL_WIDTH-1:0] target_write_data, // emulate afifo for master
-    output wire target_write_fifo_pull,                     // emulate afifo for master
-    input wire target_write_fifo_empty,                     // emulate afifo for master
     output wire done_write,
     // write address channel
     input wire AWREADY,
@@ -41,13 +42,17 @@ module axi_master #(
     output wire AWVALID,
     output wire [WRITE_BURST_LEN-1:0] AWLEN,
     output wire [2:0] AWSIZE,
-    output wire [1:0] ARBURST,
+    output wire [1:0] AWBURST,
     // write data channel
     input wire WREADY,
     output wire WVALID,
     output wire [WRITE_CHANNEL_WIDTH-1:0] WDATA,
     output wire WLAST,
-    // write data responce
+    // dma 2 master fifo
+    input wire [WRITE_CHANNEL_WIDTH-1:0] dma2master_afifo_rdata,
+    output wire dma2master_afifo_rpull,
+    input wire dma2master_afifo_rempty,
+    // write data responce channel
     output wire BREADY,
     input wire BRESP,
     input wire BVALID
@@ -77,7 +82,11 @@ axi_master_read_channel #(
     .RDATA(RDATA),
     .RLAST(RLAST),
     .RRESP(RRESP),
-    .RREADY(RREADY)
+    .RREADY(RREADY),
+    // master 2 dma fifo
+    .master2dma_afifo_wpush(master2dma_afifo_wpush),
+    .master2dma_afifo_wdata(master2dma_afifo_wdata),
+    .master2dma_afifo_wfull(master2dma_afifo_wfull)
 );
 
 axi_master_write_channel #(
@@ -91,9 +100,6 @@ axi_master_write_channel #(
     .start(start_write),
     .target_addr(target_write_addr),
     .target_write_burst_len(target_write_burst_len),
-    .target_write_data(target_write_data),
-    .target_write_fifo_pull(target_write_fifo_pull),
-    .target_write_fifo_empty(target_write_fifo_empty),
     .done(done_write),
     // write address channel
     .AWREADY(AWREADY),
@@ -107,6 +113,10 @@ axi_master_write_channel #(
     .WVALID(WVALID),
     .WDATA(WDATA),
     .WLAST(WLAST),
+    // dma 2 master fifo
+    .dma2master_afifo_rdata(dma2master_afifo_rdata),
+    .dma2master_afifo_rpull(dma2master_afifo_rpull),
+    .dma2master_afifo_rempty(dma2master_afifo_rempty),
     // write responce channel
     .BREADY(BREADY),
     .BRESP(BRESP),

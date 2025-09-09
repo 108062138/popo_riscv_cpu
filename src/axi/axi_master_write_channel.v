@@ -10,9 +10,10 @@ module axi_master_write_channel #(
     input wire start,
     input wire [ADDR_WIDTH-1:0] target_addr,
     input wire [WRITE_BURST_LEN-1:0] target_write_burst_len,
-    input wire [WRITE_CHANNEL_WIDTH-1:0] target_write_data, // emulate afifo for master
-    output wire target_write_fifo_pull,                     // emulate afifo for master
-    input wire target_write_fifo_empty,                     // emulate afifo for master
+    // dma 2 master afifo
+    input wire [WRITE_CHANNEL_WIDTH-1:0] dma2master_afifo_rdata, // emulate afifo for master
+    output wire dma2master_afifo_rpull,                     // emulate afifo for master
+    input wire dma2master_afifo_rempty,                     // emulate afifo for master
     output wire done,
     // write address channel
     input wire AWREADY,
@@ -46,7 +47,7 @@ reg [WRITE_BURST_LEN-1:0] snd_cnt, n_snd_cnt;
 wire beat_waddr, beat_wdata, beat_resp;
 assign beat_waddr = AWVALID && AWREADY;
 assign beat_wdata = WVALID && WREADY;
-assign target_write_fifo_pull = beat_wdata;
+assign dma2master_afifo_rpull = beat_wdata;
 assign beat_resp = BREADY && BVALID;
 assign done = (state==raise_done);
 // AW comb
@@ -90,9 +91,9 @@ always@(*)begin
     WVALID = 0;
     WDATA = 0;
     if(state==data_handshaking)begin
-        if(!target_write_fifo_empty)begin
+        if(!dma2master_afifo_rempty)begin
             WVALID = 1;
-            WDATA = target_write_data;
+            WDATA = dma2master_afifo_rdata;
         end
     end
 end
@@ -109,7 +110,7 @@ always@(*)begin
         else n_state = idle;
     end
     addr_handshaking:begin
-        if(AWVALID && AWREADY) n_state = data_handshaking
+        if(AWVALID && AWREADY) n_state = data_handshaking;
         else n_state = addr_handshaking;
     end
     data_handshaking:begin
