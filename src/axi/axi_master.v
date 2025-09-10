@@ -67,7 +67,7 @@ axi_master_read_channel #(
     .rst_n(rst_n),
     // read control
     .start(start_read),
-    .target_addr(target_read_addr),
+    .target_read_addr(target_read_addr),
     .target_read_burst_len(target_read_burst_len),
     .done(done_read),
     // read address channel
@@ -98,7 +98,7 @@ axi_master_write_channel #(
     .rst_n(rst_n),
     // write control
     .start(start_write),
-    .target_addr(target_write_addr),
+    .target_write_addr(target_write_addr),
     .target_write_burst_len(target_write_burst_len),
     .done(done_write),
     // write address channel

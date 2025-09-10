@@ -1,10 +1,11 @@
+// remember to add double sync
+
 module bus_one_dma_master_2_one_memory_slave #(
     parameter ADDR_WIDTH = 32,
     parameter READ_CHANNEL_WIDTH = 32,
     parameter READ_BURST_LEN = 8,
     parameter WRITE_CHANNEL_WIDTH = 32,
     parameter WRITE_BURST_LEN = 8,
-    parameter ASYNCFIFO_CHANNEL_WIDTH = 32,
     parameter ASYNCFIFO_ADDR_WIDTH = 4
 )(
     input wire cpu_clk,
@@ -24,8 +25,8 @@ module bus_one_dma_master_2_one_memory_slave #(
 );
 
 // trigger axi read procedure
-wire axi_master_read_start;
-wire axi_master_read_done;
+wire axi_master_read_start, dsync_axi_master_read_start;
+wire axi_master_read_done, dsync_axi_master_read_done;
 wire [ADDR_WIDTH-1:0] axi_master_target_read_addr;
 wire [READ_BURST_LEN-1:0] axi_master_target_read_burst_len;
 // read address channel
@@ -50,8 +51,8 @@ wire [READ_CHANNEL_WIDTH-1:0] master2dma_afifo_wdata;
 wire master2dma_afifo_wfull;
 
 // trigger axi write procedur
-wire axi_master_write_start;
-wire axi_master_write_done;
+wire axi_master_write_start, dsync_axi_master_write_start;
+wire axi_master_write_done, dsync_axi_master_write_done;
 wire [ADDR_WIDTH-1:0] axi_master_target_write_addr;
 wire [WRITE_BURST_LEN-1:0] axi_master_target_write_burst_len;
 // write address channel
@@ -78,9 +79,36 @@ wire [WRITE_CHANNEL_WIDTH-1:0] dma2master_afifo_rdata;
 wire dma2master_afifo_rpull;
 wire dma2master_afifo_rempty;
 
+double_sync #(.ADDR_WIDTH(1)) u_double_sync_dsync_axi_master_read_start(
+    .clk(sys_clk),
+    .rst_n(sys_rst_n),
+    .din(axi_master_read_start),
+    .dout(dsync_axi_master_read_start)
+);
+double_sync #(.ADDR_WIDTH(1)) u_double_sync_dsync_axi_master_read_done(
+    .clk(cpu_clk),
+    .rst_n(cpu_rst_n),
+    .din(axi_master_read_done),
+    .dout(dsync_axi_master_read_done)
+);
+
+double_sync #(.ADDR_WIDTH(1)) u_double_sync_dsync_axi_master_write_start(
+    .clk(sys_clk),
+    .rst_n(sys_rst_n),
+    .din(axi_master_write_start),
+    .dout(dsync_axi_master_write_start)
+);
+double_sync #(.ADDR_WIDTH(1)) u_double_sync_dsync_axi_master_write_done(
+    .clk(cpu_clk),
+    .rst_n(cpu_rst_n),
+    .din(axi_master_write_done),
+    .dout(dsync_axi_master_write_done)
+);
+
+
 // READ DATA: CPU <= DMA <= MASTER <= BUS <= SLAVE <= MEMORY
 asyncfifo #(
-    .DATA_WIDTH(ASYNCFIFO_CHANNEL_WIDTH),
+    .DATA_WIDTH(READ_CHANNEL_WIDTH),
     .ADDR_WIDTH(ASYNCFIFO_ADDR_WIDTH)
 ) u_master2dma_afifo (
     // read domain is system clock
@@ -99,7 +127,7 @@ asyncfifo #(
 
 // WRITE DATA: CPU => DMA => MASTER => BUS => SLAVE => MEMORY
 asyncfifo #(
-    .DATA_WIDTH(ASYNCFIFO_CHANNEL_WIDTH),
+    .DATA_WIDTH(WRITE_CHANNEL_WIDTH),
     .ADDR_WIDTH(ASYNCFIFO_ADDR_WIDTH)
 ) u_dma2master_afifo (
     // read domain is system clock
@@ -132,7 +160,7 @@ dma #(
     .dma_page_fault_burst_len(dma_page_fault_burst_len),
     // trigger axi read procedure
     .axi_master_read_start(axi_master_read_start),
-    .axi_master_read_done(axi_master_read_done),
+    .axi_master_read_done(dsync_axi_master_read_done),
     .axi_master_target_read_addr(axi_master_target_read_addr),
     .axi_master_target_read_burst_len(axi_master_target_read_burst_len),
     // pull data from master2dma_afifo
@@ -147,7 +175,7 @@ dma #(
     .dma_write_back_burst_len(dma_write_back_burst_len),
     // trigger axi write procedure
     .axi_master_write_start(axi_master_write_start),
-    .axi_master_write_done(axi_master_write_done),
+    .axi_master_write_done(dsync_axi_master_write_done),
     .axi_master_target_write_addr(axi_master_target_write_addr),
     .axi_master_target_write_burst_len(axi_master_target_write_burst_len),
     // push data into dma2master_afifo
@@ -166,10 +194,10 @@ axi_master #(
     .clk(sys_clk),
     .rst_n(sys_rst_n),
     // read control:
-    .start_read(axi_master_read_start),
+    .start_read(dsync_axi_master_read_start),
     .target_read_addr(axi_master_target_read_addr),
     .target_read_burst_len(axi_master_target_read_burst_len),
-    .done_read(axi_master_target_read_burst_len),
+    .done_read(axi_master_read_done),
     // read address channel
     .ARREADY(ARREADY),
     .ARADDR(ARADDR),
@@ -188,9 +216,8 @@ axi_master #(
     .master2dma_afifo_wdata(master2dma_afifo_wdata),
     .master2dma_afifo_wfull(master2dma_afifo_wfull),
 
-    
     // write control:
-    .start_write(axi_master_write_start),
+    .start_write(dsync_axi_master_write_start),
     .target_write_addr(axi_master_target_write_addr),
     .target_write_burst_len(axi_master_target_write_burst_len),
     .done_write(axi_master_write_done),
@@ -213,7 +240,7 @@ axi_master #(
     // write data responce channel
     .BREADY(BREADY),
     .BRESP(BRESP),
-    .BVALID(BVALID),
+    .BVALID(BVALID)
 );
 
 axi_slave #(
@@ -252,9 +279,9 @@ axi_slave #(
     .WDATA(WDATA),
     .WLAST(WLAST),
     // write responce channel
-    BREADY(BREADY),
-    BRESP(BRESP),
-    BVALID(BVALID)
+    .BREADY(BREADY),
+    .BRESP(BRESP),
+    .BVALID(BVALID)
 );
 
 endmodule

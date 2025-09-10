@@ -18,27 +18,29 @@ module axi_slave_read_channel #(
     output reg [READ_CHANNEL_WIDTH-1:0] RDATA,
     output reg RLAST,
     output reg [1:0] RRESP,
-    input wire RREADY
+    input wire RREADY,
+    // mem control signal
+    output wire mem_ren,
+    output wire [ADDR_WIDTH-1:0] mem_raddr,
+    input wire [READ_CHANNEL_WIDTH-1:0] mem_rdata
 );
 
 localparam idle = 0;
 localparam transmit = 1;
 
 reg [1:0] state, n_state;
-
+reg ff_RREADY;
 reg [ADDR_WIDTH-1:0] r_ARADDR, n_r_ARADDR;
 reg [READ_BURST_LEN-1:0] r_ARLEN, n_r_ARLEN, snd_cnt, n_snd_cnt;
 reg [2:0] r_ARSIZE, n_r_ARSIZE;
 reg [1:0] r_ARBURST, n_r_ARBURST;
 
-wire lfsr_out;
 wire beat_raddr, beat_rdata;
 
 assign beat_raddr = (ARVALID && ARREADY);
 assign beat_rdata = (RVALID && RREADY);
-
-// just to immitate rcving data buffer condition
-lfsr_4 u_lfsr_4(.clk(clk), .rst_n(rst_n), .lfsr_out(lfsr_out));
+assign mem_raddr = ARADDR + snd_cnt;
+assign mem_ren = RREADY;
 
 // remember the raddr value
 always@(*)begin
@@ -60,26 +62,28 @@ always@(*)begin
     if(state!=idle) ARREADY = 0;
 end
 
+// read data
+always@(*)begin
+    if(state==transmit)begin
+        if(RREADY && RVALID) n_snd_cnt = snd_cnt + 1;
+        else n_snd_cnt = snd_cnt;
+    end else begin
+        n_snd_cnt = 0;
+    end
+end
+
 // R comb. for handshaking signals
 always@(*)begin
     if(state==transmit)begin
-        if(lfsr_out)begin
+        if(ff_RREADY)begin
             RVALID = 1;
-            if(RREADY)begin
-                n_snd_cnt = snd_cnt + 1;
-                RDATA = r_ARADDR + {24'b0, snd_cnt};
-            end else begin
-                n_snd_cnt = snd_cnt;
-                RDATA = 0;
-            end
+            RDATA = mem_rdata;
         end else begin
             RVALID = 0;
-            n_snd_cnt = snd_cnt;
             RDATA = 0;
         end
     end else begin
         RVALID = 0;
-        n_snd_cnt = 0;
         RDATA = 0;
     end
 
@@ -104,7 +108,9 @@ always@(*)begin
     default: n_state = state;
     endcase
 end
-
+always@(posedge clk)begin
+    ff_RREADY <= RREADY;
+end
 always@(posedge clk)begin
     if(!rst_n)begin
         state <= idle;

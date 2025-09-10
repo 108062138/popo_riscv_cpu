@@ -8,12 +8,12 @@ module axi_master_write_channel #(
     input wire clk,
     input wire rst_n,
     input wire start,
-    input wire [ADDR_WIDTH-1:0] target_addr,
+    input wire [ADDR_WIDTH-1:0] target_write_addr,
     input wire [WRITE_BURST_LEN-1:0] target_write_burst_len,
     // dma 2 master afifo
-    input wire [WRITE_CHANNEL_WIDTH-1:0] dma2master_afifo_rdata, // emulate afifo for master
-    output wire dma2master_afifo_rpull,                     // emulate afifo for master
-    input wire dma2master_afifo_rempty,                     // emulate afifo for master
+    input wire [WRITE_CHANNEL_WIDTH-1:0] dma2master_afifo_rdata,
+    output wire dma2master_afifo_rpull,
+    input wire dma2master_afifo_rempty,
     output wire done,
     // write address channel
     input wire AWREADY,
@@ -40,7 +40,7 @@ localparam resp = 3;
 localparam raise_done = 4;
 
 reg [2:0] state, n_state;
-reg [ADDR_WIDTH-1:0] rem_target_addr, n_rem_target_addr;
+reg [ADDR_WIDTH-1:0] rem_target_write_addr, n_rem_target_write_addr;
 reg [WRITE_BURST_LEN-1:0] rem_target_burst_len, n_rem_target_burst_len;
 reg [WRITE_BURST_LEN-1:0] snd_cnt, n_snd_cnt;
 
@@ -50,9 +50,10 @@ assign beat_wdata = WVALID && WREADY;
 assign dma2master_afifo_rpull = beat_wdata;
 assign beat_resp = BREADY && BVALID;
 assign done = (state==raise_done);
+
 // AW comb
 always@(*)begin
-    AWADDR = rem_target_addr;
+    AWADDR = rem_target_write_addr;
     AWVALID = 1'b0;
     if(state==addr_handshaking)begin
         AWVALID = 1;
@@ -64,11 +65,11 @@ end
 
 // comb for w addr
 always@(*)begin
-    n_rem_target_addr = rem_target_addr;
+    n_rem_target_write_addr = rem_target_write_addr;
     n_rem_target_burst_len = rem_target_burst_len;
     if(state == idle && start) begin
-        n_rem_target_addr = AWADDR;
-        n_rem_target_burst_len = AWLEN;
+        n_rem_target_write_addr = target_write_addr;
+        n_rem_target_burst_len = target_write_burst_len;
     end
 end
 
@@ -84,7 +85,7 @@ always@(*)begin
     end
     WLAST = 0;
     if(state==data_handshaking)begin
-        if(WVALID && WREADY && snd_cnt>=rem_burst_len)begin
+        if(snd_cnt>=rem_target_burst_len)begin
             WLAST = 1;
         end
     end
@@ -106,7 +107,7 @@ end
 always@(*)begin
     case(state)
     idle:begin
-        if(start) n_state = set_addr;
+        if(start) n_state = addr_handshaking;
         else n_state = idle;
     end
     addr_handshaking:begin
@@ -131,12 +132,12 @@ end
 always@(posedge clk)begin
     if(!rst_n)begin
         state <= idle;
-        rem_target_addr <= 0;
+        rem_target_write_addr <= 0;
         rem_target_burst_len <= 0;
         snd_cnt <= 0;
     end else begin
         state <= n_state;
-        rem_target_addr <= n_rem_target_addr;
+        rem_target_write_addr <= n_rem_target_write_addr;
         rem_target_burst_len <= n_rem_target_burst_len;
         snd_cnt <= n_snd_cnt;
     end

@@ -2,7 +2,7 @@ module tb_axi();
 
 parameter CPU_CYC = 10;
 parameter SYS_CYC = 40;
-parameter max_cyc = 200;
+parameter max_cyc = 800;
 reg cpu_clk;
 reg sys_clk;
 reg cpu_rst_n;
@@ -25,7 +25,7 @@ end
 initial begin
     reset_all();
     clear_dma_setting();
-    write_only(8'd23);
+    write_only(.desire_addr(32'd20), .number_of_write(8'd6));
 end
 
 parameter ADDR_WIDTH = 32;
@@ -46,20 +46,15 @@ wire dma_write_back_done;
 reg [ADDR_WIDTH-1:0] dma_write_back_addr;
 reg [WRITE_BURST_LEN-1:0] dma_write_back_burst_len;
 
+
+
 event reset_done;
 task reset_all();
 fork
     begin
-        sys_rst_n = 1; repeat(2)@(negedge sys_clk);
-        sys_rst_n = 0; repeat(2)@(negedge sys_clk);
-        @(negedge sys_clk); 
-        sys_rst_n = 1;
-    end
-    begin
-        cpu_rst_n = 1; repeat(2)@(negedge cpu_clk);
-        cpu_rst_n = 0; repeat(2)@(negedge cpu_clk);
-        @(negedge cpu_clk); 
-        cpu_rst_n = 1;
+        sys_rst_n = 1; cpu_rst_n = 1; repeat(2)@(negedge sys_clk);
+        sys_rst_n = 0; cpu_rst_n = 0; repeat(2)@(negedge sys_clk);
+        sys_rst_n = 1; cpu_rst_n = 1; repeat(4)@(negedge sys_clk);
     end
 join
 -> reset_done;
@@ -80,9 +75,10 @@ endtask
 event write_only_done;
 task write_only();
 input [WRITE_BURST_LEN-1:0] number_of_write;
+input [ADDR_WIDTH-1:0] desire_addr;
 fork
     begin
-        dma_write_back_addr = 30;
+        dma_write_back_addr = desire_addr;
         dma_write_back_burst_len = number_of_write - 1;
         dma_write_back_happen = 1;
         repeat(10)@(negedge cpu_clk);
@@ -90,4 +86,29 @@ fork
 join
 -> write_only_done;
 endtask
+
+bus_one_dma_master_2_one_memory_slave #(
+    .ADDR_WIDTH(ADDR_WIDTH),
+    .READ_CHANNEL_WIDTH(READ_CHANNEL_WIDTH),
+    .READ_BURST_LEN(READ_BURST_LEN),
+    .WRITE_CHANNEL_WIDTH(WRITE_CHANNEL_WIDTH),
+    .WRITE_BURST_LEN(WRITE_BURST_LEN),
+    .ASYNCFIFO_ADDR_WIDTH(ASYNCFIFO_ADDR_WIDTH)
+) popo_bus (
+    .cpu_clk(cpu_clk),
+    .cpu_rst_n(cpu_rst_n),
+    .sys_clk(sys_clk),
+    .sys_rst_n(sys_rst_n),
+    // page fault happend
+    .dma_page_fault_happen(dma_page_fault_happen),
+    .dma_page_fault_done(dma_page_fault_done),
+    .dma_page_fault_addr(dma_page_fault_addr),
+    .dma_page_fault_burst_len(dma_page_fault_burst_len),
+    // cache flush happend
+    .dma_write_back_happen(dma_write_back_happen),
+    .dma_write_back_done(dma_write_back_done),
+    .dma_write_back_addr(dma_write_back_addr),
+    .dma_write_back_burst_len(dma_write_back_burst_len)
+);
+
 endmodule

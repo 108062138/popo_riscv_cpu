@@ -42,13 +42,13 @@ module dma #(
 localparam r_idle = 0;
 localparam r_processing = 1;
 localparam r_done = 2;
-localparam w_idle = 0;
-localparam w_processing = 1;
-localparam w_done = 2;
+localparam w_idle = 3;
+localparam w_processing = 4;
+localparam w_done = 5;
 
-reg [1:0] r_state, n_r_state;
+reg [2:0] r_state, n_r_state;
 reg [READ_BURST_LEN-1:0] r_cnt, n_r_cnt;
-reg [1:0] w_state, n_w_state;
+reg [2:0] w_state, n_w_state;
 reg [WRITE_BURST_LEN-1:0] w_cnt, n_w_cnt;
 
 assign dma_page_fault_done = (r_state == r_done);
@@ -72,15 +72,14 @@ always@(*)begin
     n_w_cnt = w_cnt;
     dma2master_afifo_wpush = 0;
     dma2master_afifo_wdata = 0;
-    if(r_state == w_idle)begin
+    
+    if(w_state==w_idle)begin
         n_w_cnt = 0;
-    end else begin
-        if(!dma2master_afifo_wfull)begin
-            dma2master_afifo_wpush = 1;
-            dma2master_afifo_wdata = dma_write_back_addr + w_cnt;
-            n_w_cnt = w_cnt + 1;
-        end
-    end
+    end else if(!dma2master_afifo_wfull && w_state==w_processing && w_cnt <= dma_write_back_burst_len)begin
+        dma2master_afifo_wpush = 1;
+        dma2master_afifo_wdata = dma_write_back_addr + w_cnt;
+        n_w_cnt = w_cnt + 1;
+    end 
 end
 // handle read
 always@(*)begin
@@ -91,7 +90,7 @@ end
 always@(*)begin
     case(r_state)
     r_idle:begin
-        if(dma_page_fault_happen) n_r_state = r_processing;
+        if(dma_page_fault_happen && !axi_master_read_done) n_r_state = r_processing;
         else n_r_state = r_idle;
     end
     r_processing:begin
@@ -108,14 +107,14 @@ end
 
 // handle write
 always@(*)begin
-    axi_master_write_start = (r_state == r_processing);
+    axi_master_write_start = (w_state == w_processing);
     axi_master_target_write_addr = dma_write_back_addr;
     axi_master_target_write_burst_len = dma_write_back_burst_len;
 end
 always@(*)begin
     case(w_state)
     w_idle:begin
-        if(dma_write_back_happen) n_w_state = w_processing;
+        if(dma_write_back_happen && !axi_master_write_done) n_w_state = w_processing;
         else n_w_state = w_idle;
     end
     w_processing:begin
@@ -126,7 +125,7 @@ always@(*)begin
         if(w_cnt >= dma_write_back_burst_len) n_w_state = w_idle;
         else n_w_state = w_done;
     end
-    default: n_r_state = w_state;
+    default: n_w_state = w_state;
     endcase
 end
 
@@ -137,9 +136,9 @@ always @(posedge cpu_clk) begin
         r_state <= r_idle;
         r_cnt <= 0;
     end else begin
-        w_state <= n_w_idle;
+        w_state <= n_w_state;
         w_cnt <= n_w_cnt;
-        r_state <= n_r_idle;
+        r_state <= n_r_state;
         r_cnt <= n_r_cnt;
     end
 end

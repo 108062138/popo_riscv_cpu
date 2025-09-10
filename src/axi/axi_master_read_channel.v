@@ -8,7 +8,7 @@ module axi_master_read_channel #(
     input wire clk,
     input wire rst_n,
     input wire start,
-    input wire [ADDR_WIDTH-1:0] target_addr,
+    input wire [ADDR_WIDTH-1:0] target_read_addr,
     input wire [READ_BURST_LEN-1:0] target_read_burst_len,
     output wire done,
     // read address channel
@@ -36,7 +36,7 @@ localparam data_handshaking = 2;
 localparam raise_done = 3; 
 
 reg [1:0] state, n_state;
-reg [ADDR_WIDTH-1:0] rem_target_addr, n_rem_target_addr;
+reg [ADDR_WIDTH-1:0] rem_target_read_addr, n_rem_target_read_addr;
 reg [READ_BURST_LEN-1:0] rem_burst_len, n_rem_burst_len;
 wire lfsr_out;
 wire beat_raddr, beat_rdata;
@@ -50,7 +50,7 @@ lfsr_6 u_lfsr_6(.clk(clk), .rst_n(rst_n), .lfsr_out(lfsr_out));
 
 // AR comb. for handshaking signals
 always@(*)begin
-    ARADDR = rem_target_addr;
+    ARADDR = rem_target_read_addr;
     ARVALID = 1'b0;
     if(state == addr_handshaking)begin
         if(lfsr_out)ARVALID = 1'b1;
@@ -76,10 +76,10 @@ end
 
 // comb for rem target read addr
 always@(*)begin
-    n_rem_target_addr = rem_target_addr;
+    n_rem_target_read_addr = rem_target_read_addr;
     n_rem_burst_len = rem_burst_len;
     if(state == idle && start) begin
-        n_rem_target_addr = target_addr;
+        n_rem_target_read_addr = target_read_addr;
         n_rem_burst_len = target_read_burst_len;
     end
 end
@@ -107,11 +107,11 @@ end
 always @(posedge clk) begin
     if (!rst_n) begin
         state <= idle;
-        rem_target_addr <= 0;
+        rem_target_read_addr <= 0;
         rem_burst_len <= 0;
     end else begin
         state <= n_state;
-        rem_target_addr <= n_rem_target_addr;
+        rem_target_read_addr <= n_rem_target_read_addr;
         rem_burst_len <= n_rem_burst_len;
     end
 end

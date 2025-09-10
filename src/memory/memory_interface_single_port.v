@@ -1,4 +1,4 @@
-module memory_interface #(
+module memory_interface_single_port #(
     parameter INIT_BY = 1,
     parameter CONTENT_WIDTH = 32,
     parameter CONTENT_ADDR_WIDTH = 32
@@ -24,12 +24,12 @@ always@(posedge clk)begin
     else valid <= 0;
 end
 
-memory_wrapper  #(
+memory_wrapper_single_port  #(
     .INIT_BY(INIT_BY),
     .DATA_WIDTH(CONTENT_WIDTH),
     .ADDR_WIDTH(CONTENT_ADDR_WIDTH),
     .NUM_WORDS(128/*1<<CONTENT_ADDR_WIDTH*/)
-) u_mem(
+) u_mem_single_port (
     .clk(clk),
     .rst_n(rst_n),
     .we(we),

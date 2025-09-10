@@ -1,4 +1,4 @@
-module memory_wrapper #(
+module memory_wrapper_single_port #(
     parameter INIT_BY = 0,
     parameter DATA_WIDTH = 32,
     parameter ADDR_WIDTH = 32,

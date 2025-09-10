@@ -1,5 +1,6 @@
 module axi_slave #(
     parameter ADDR_WIDTH = 32,
+    parameter NUM_WORDS = 128,
     parameter READ_CHANNEL_WIDTH = 32, // 32 bit per read beat
     parameter READ_BURST_LEN = 8,
     parameter WRITE_CHANNEL_WIDTH = 32, // 32 bit per burst
@@ -39,6 +40,14 @@ module axi_slave #(
     output wire BVALID
 );
 
+wire mem_wen;
+wire [ADDR_WIDTH-1:0] mem_waddr;
+wire [WRITE_CHANNEL_WIDTH-1:0] mem_wdata;
+
+wire mem_ren;
+wire [ADDR_WIDTH-1:0] mem_raddr;
+wire [READ_CHANNEL_WIDTH-1:0] mem_rdata;
+
 axi_slave_read_channel #(
     .ADDR_WIDTH(ADDR_WIDTH),
     .READ_CHANNEL_WIDTH(READ_CHANNEL_WIDTH),
@@ -58,7 +67,11 @@ axi_slave_read_channel #(
     .RDATA(RDATA),
     .RLAST(RLAST),
     .RRESP(RRESP),
-    .RREADY(RREADY)
+    .RREADY(RREADY),
+    // mem control signal
+    .mem_ren(mem_ren),
+    .mem_raddr(mem_raddr),
+    .mem_rdata(mem_rdata)
 );
 
 axi_slave_write_channel #(
@@ -83,7 +96,27 @@ axi_slave_write_channel #(
     // write responce channel
     .BREADY(BREADY),
     .BRESP(BRESP),
-    .BVALID(BVALID)
+    .BVALID(BVALID),
+    // mem control signal
+    .mem_wen(mem_wen),
+    .mem_waddr(mem_waddr),
+    .mem_wdata(mem_wdata)
+);
+
+memory_wrapper_dual_port #(
+    .INIT_BY(0),
+    .DATA_WIDTH(WRITE_CHANNEL_WIDTH), 
+    .ADDR_WIDTH(ADDR_WIDTH), 
+    .NUM_WORDS(NUM_WORDS)
+) u_slave_mem (
+    .clk(clk),
+    .rst_n(rst_n),
+    .ren(mem_ren),
+    .raddr(mem_raddr),
+    .rdata(mem_rdata),
+    .wen(mem_wen),
+    .waddr(mem_waddr),
+    .wdata(mem_wdata)
 );
 
 endmodule
