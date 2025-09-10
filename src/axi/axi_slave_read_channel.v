@@ -20,97 +20,110 @@ module axi_slave_read_channel #(
     output reg [1:0] RRESP,
     input wire RREADY,
     // mem control signal
-    output wire mem_ren,
-    output wire [ADDR_WIDTH-1:0] mem_raddr,
+    output reg mem_ren,
+    output reg [ADDR_WIDTH-1:0] mem_raddr,
     input wire [READ_CHANNEL_WIDTH-1:0] mem_rdata
 );
 
 localparam idle = 0;
-localparam transmit = 1;
+localparam prep_0 = 1;
+localparam prep_1 = 2;
+localparam same = 3;
+localparam diff = 4;
 
-reg [1:0] state, n_state;
-reg ff_RREADY;
+
+reg cd, n_cd;
+reg [2:0] state, n_state;
 reg [ADDR_WIDTH-1:0] r_ARADDR, n_r_ARADDR;
-reg [READ_BURST_LEN-1:0] r_ARLEN, n_r_ARLEN, snd_cnt, n_snd_cnt;
+reg [ADDR_WIDTH-1:0] prev_raddr, cur_raddr;
+reg [READ_BURST_LEN-1:0] r_ARLEN, n_r_ARLEN;
+reg [READ_BURST_LEN-1:0] snd_cnt, n_snd_cnt;
+reg [READ_BURST_LEN-1:0] read_mark, n_read_mark;
 reg [2:0] r_ARSIZE, n_r_ARSIZE;
 reg [1:0] r_ARBURST, n_r_ARBURST;
 
-wire beat_raddr, beat_rdata;
+always @(*) begin
+    ARREADY = (state==idle);
+end
 
-assign beat_raddr = (ARVALID && ARREADY);
-assign beat_rdata = (RVALID && RREADY);
-assign mem_raddr = ARADDR + snd_cnt;
-assign mem_ren = RREADY;
-
-// remember the raddr value
 always@(*)begin
     n_r_ARADDR = r_ARADDR;
     n_r_ARLEN = r_ARLEN;
     n_r_ARSIZE = r_ARSIZE;
     n_r_ARBURST = r_ARBURST;
-    if(state==idle && ARVALID && ARREADY)begin
+    if(state==idle)begin
         n_r_ARADDR = ARADDR;
         n_r_ARLEN = ARLEN;
         n_r_ARSIZE = ARSIZE;
         n_r_ARBURST = ARBURST;
     end
 end
-
-// AR comb. for handshaking signals
-always@(*)begin
-    ARREADY = 1;
-    if(state!=idle) ARREADY = 0;
-end
-
-// read data
-always@(*)begin
-    if(state==transmit)begin
-        if(RREADY && RVALID) n_snd_cnt = snd_cnt + 1;
-        else n_snd_cnt = snd_cnt;
-    end else begin
-        n_snd_cnt = 0;
+always @(*) begin
+    RVALID = 0;
+    if(state==same)begin
+        RVALID = 1;
+    end else if(state==diff && cd)begin
+        RVALID = 1;
     end
 end
-
-// R comb. for handshaking signals
-always@(*)begin
-    if(state==transmit)begin
-        if(ff_RREADY)begin
-            RVALID = 1;
-            RDATA = mem_rdata;
-        end else begin
-            RVALID = 0;
-            RDATA = 0;
-        end
-    end else begin
-        RVALID = 0;
-        RDATA = 0;
-    end
-
-    RLAST = 0;
-    RRESP = 0;
-    if(state==transmit && RVALID && RREADY && snd_cnt==r_ARLEN)begin
-        RLAST = 1;
-        RRESP = 1;
-    end
+always @(*) begin
+    mem_ren = (state!=idle);
+    mem_raddr = r_ARADDR + read_mark;
+    RLAST = (snd_cnt==r_ARLEN)? 1'b1: 1'b0;
+    RRESP = (snd_cnt==r_ARLEN)? 2'b10 : 2'b0;
+    RDATA = mem_rdata;
 end
-
-always@(*)begin
+always @(*) begin
     case(state)
     idle:begin
-        if(ARVALID && ARREADY) n_state = transmit;
-        else n_state = idle;
+        if(ARVALID && ARREADY)begin
+            n_state = prep_0;
+        end else n_snd_cnt = idle;
+        n_snd_cnt = 0;
+        n_cd = 0;
+        n_read_mark = 0;
     end
-    transmit:begin
-        if(snd_cnt >= r_ARLEN && RVALID && RREADY) n_state = idle;
-        else n_state = transmit;
+    prep_0: begin
+        n_state = prep_1;
+        n_snd_cnt = 0;
+        n_cd = 0;
+        n_read_mark = 0;
     end
-    default: n_state = state;
+    prep_1: begin
+        n_state = same;
+        n_snd_cnt = 0;
+        n_cd = 0;
+        n_read_mark = 0;
+    end
+    same:begin
+        if(RREADY)begin
+            if(snd_cnt < r_ARLEN) n_state = diff;
+            else n_state = idle;
+        end else n_state = same;
+        n_cd = 0;
+        n_read_mark = read_mark + (RVALID && RREADY);
+        n_snd_cnt = snd_cnt + (RVALID && RREADY);
+    end
+    diff:begin
+        if(RREADY)begin
+            if(snd_cnt < r_ARLEN) n_state = diff;
+            else n_state = idle;
+        end else begin
+            n_state = same;
+        end
+        n_cd = 1;
+        n_snd_cnt = snd_cnt + (RVALID && RREADY);
+        n_read_mark = read_mark + 1;
+    end
+    default: begin
+        n_state = state;
+        n_snd_cnt = 0;
+        n_cd = 0;
+        n_read_mark = 0;
+    end
     endcase
 end
-always@(posedge clk)begin
-    ff_RREADY <= RREADY;
-end
+
 always@(posedge clk)begin
     if(!rst_n)begin
         state <= idle;
@@ -119,6 +132,9 @@ always@(posedge clk)begin
         snd_cnt <= 0;
         r_ARSIZE <= 0;
         r_ARBURST <= 0;
+        prev_raddr <= 0;
+        cur_raddr <= 0;
+        read_mark <= 0;
     end else begin
         state <= n_state;
         r_ARADDR <= n_r_ARADDR;
@@ -126,6 +142,9 @@ always@(posedge clk)begin
         snd_cnt <= n_snd_cnt;
         r_ARSIZE <= n_r_ARSIZE;
         r_ARBURST <= n_r_ARBURST;
+        prev_raddr <= mem_raddr;
+        cd <= n_cd;
+        read_mark <= n_read_mark;
     end
 end
 

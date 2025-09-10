@@ -45,15 +45,12 @@ assign beat_raddr = (ARVALID && ARREADY);
 assign beat_rdata = (RVALID && RREADY);
 assign done = (state==raise_done);
 
-// just to immitate rcving data buffer condition
-lfsr_6 u_lfsr_6(.clk(clk), .rst_n(rst_n), .lfsr_out(lfsr_out));
-
 // AR comb. for handshaking signals
 always@(*)begin
     ARADDR = rem_target_read_addr;
     ARVALID = 1'b0;
     if(state == addr_handshaking)begin
-        if(lfsr_out)ARVALID = 1'b1;
+        ARVALID = 1'b1;
     end
     ARLEN = rem_burst_len; // 4 bytes per beat
     ARSIZE = 3'b010; // 4 bytes per beat
@@ -61,19 +58,25 @@ always@(*)begin
 end
 
 // R comb. for handshaking signals
-always@(*)begin
+always@(*)begin//123456
     RREADY = 1'b0;
     master2dma_afifo_wpush = 1'b0;
     master2dma_afifo_wdata = 0;
     if(state == data_handshaking)begin
-        if(RVALID && !master2dma_afifo_wfull)begin
+        if(!master2dma_afifo_wfull)begin
             RREADY = 1'b1;
-            master2dma_afifo_wpush = 1;
-            master2dma_afifo_wdata = RDATA;
+            if(RVALID)begin
+                master2dma_afifo_wpush = 1;
+                master2dma_afifo_wdata = RDATA;
+            end
         end
     end
 end
-
+always @(posedge clk) begin
+    if(state==data_handshaking)begin
+        if(RVALID && RREADY) $display("read and about to send %d to dma", RDATA);
+    end
+end
 // comb for rem target read addr
 always@(*)begin
     n_rem_target_read_addr = rem_target_read_addr;
@@ -88,7 +91,7 @@ end
 always@(*)begin
     case(state)
     idle: begin
-        if(!start) n_state = idle;
+        if(!start || done) n_state = idle;
         else n_state = addr_handshaking;
     end
     addr_handshaking: begin

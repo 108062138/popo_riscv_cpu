@@ -107,8 +107,8 @@ end
 always@(*)begin
     case(state)
     idle:begin
-        if(start) n_state = addr_handshaking;
-        else n_state = idle;
+        if(!start || done) n_state = idle;
+        else n_state = addr_handshaking;
     end
     addr_handshaking:begin
         if(AWVALID && AWREADY) n_state = data_handshaking;

@@ -13,6 +13,8 @@ always #(CPU_CYC/2) cpu_clk = ~cpu_clk;
 always #(SYS_CYC/2) sys_clk = ~sys_clk;
 initial begin
     repeat(max_cyc) @(posedge cpu_clk);
+    // @read_only_done;
+    // @write_only_done;
     $display("(QQ my love)");
     $finish;
 end
@@ -25,7 +27,13 @@ end
 initial begin
     reset_all();
     clear_dma_setting();
-    write_only(.desire_addr(32'd20), .number_of_write(8'd6));
+    $display("start write only");
+    write_only(.desire_addr(32'd8), .number_of_write(8'd20));
+    $display("finish write only");
+    clear_dma_setting();
+    $display("start read only");
+    read_only(.desire_addr(32'd15), .number_of_read(8'd1));
+    clear_dma_setting();
 end
 
 parameter ADDR_WIDTH = 32;
@@ -46,8 +54,6 @@ wire dma_write_back_done;
 reg [ADDR_WIDTH-1:0] dma_write_back_addr;
 reg [WRITE_BURST_LEN-1:0] dma_write_back_burst_len;
 
-
-
 event reset_done;
 task reset_all();
 fork
@@ -60,6 +66,7 @@ join
 -> reset_done;
 endtask
 
+event clear_dma_setting_done;
 task clear_dma_setting();
     begin
         dma_page_fault_happen = 0;
@@ -70,6 +77,7 @@ task clear_dma_setting();
         dma_write_back_burst_len = 0;
         repeat(2)@(negedge cpu_clk);
     end
+-> clear_dma_setting_done;
 endtask
 
 event write_only_done;
@@ -81,11 +89,30 @@ fork
         dma_write_back_addr = desire_addr;
         dma_write_back_burst_len = number_of_write - 1;
         dma_write_back_happen = 1;
-        repeat(10)@(negedge cpu_clk);
+        while (!dma_write_back_done) @(negedge cpu_clk);
     end
 join
 -> write_only_done;
 endtask
+
+event read_only_done;
+task read_only();
+input [WRITE_BURST_LEN-1:0] number_of_read;
+input [ADDR_WIDTH-1:0] desire_addr;
+fork
+    begin
+        dma_page_fault_addr = desire_addr;
+        dma_page_fault_burst_len = number_of_read - 1;
+        dma_page_fault_happen = 1;
+        repeat(4) @(negedge cpu_clk);
+        $display("wwwwww");
+
+        while (dma_page_fault_done) @(negedge cpu_clk);
+    end
+join
+-> read_only_done;
+endtask
+
 
 bus_one_dma_master_2_one_memory_slave #(
     .ADDR_WIDTH(ADDR_WIDTH),

@@ -48,8 +48,10 @@ localparam w_done = 5;
 
 reg [2:0] r_state, n_r_state;
 reg [READ_BURST_LEN-1:0] r_cnt, n_r_cnt;
+reg [1:0] cool_r, n_cool_r;
 reg [2:0] w_state, n_w_state;
 reg [WRITE_BURST_LEN-1:0] w_cnt, n_w_cnt;
+reg [5:0] cool_w, n_cool_w;
 
 assign dma_page_fault_done = (r_state == r_done);
 assign dma_write_back_done = (w_state == w_done);
@@ -77,55 +79,81 @@ always@(*)begin
         n_w_cnt = 0;
     end else if(!dma2master_afifo_wfull && w_state==w_processing && w_cnt <= dma_write_back_burst_len)begin
         dma2master_afifo_wpush = 1;
-        dma2master_afifo_wdata = dma_write_back_addr + w_cnt;
+        dma2master_afifo_wdata = dma_write_back_addr + w_cnt+ 50;
         n_w_cnt = w_cnt + 1;
     end 
 end
 // handle read
-always@(*)begin
-    axi_master_read_start = (r_state == r_processing);
-    axi_master_target_read_addr = dma_page_fault_addr;
-    axi_master_target_read_burst_len = dma_page_fault_burst_len;
+always@(posedge cpu_clk)begin
+    if(dma_page_fault_happen)begin
+        axi_master_read_start <= (r_state == r_processing);
+        axi_master_target_read_addr <= dma_page_fault_addr;
+        axi_master_target_read_burst_len <= dma_page_fault_burst_len;
+    end else begin
+        axi_master_read_start <= axi_master_read_start && (cool_r < 3);
+        axi_master_target_read_addr <= axi_master_target_read_addr;
+        axi_master_target_read_burst_len <= axi_master_target_read_burst_len;
+    end 
 end
 always@(*)begin
+    n_cool_r = cool_r;
     case(r_state)
     r_idle:begin
         if(dma_page_fault_happen && !axi_master_read_done) n_r_state = r_processing;
         else n_r_state = r_idle;
+        n_cool_r = 0;
     end
     r_processing:begin
+        n_cool_r = (cool_r<=3)? cool_r +1: cool_r;
         if(axi_master_read_done) n_r_state = r_done;
         else n_r_state = r_processing;
     end
     r_done:begin
+        n_cool_r = cool_r;
         if(r_cnt >= dma_page_fault_burst_len) n_r_state = r_idle;
         else n_r_state = r_done;
     end
-    default: n_r_state = r_state;
+    default: begin
+        n_cool_r = cool_r;
+        n_r_state = r_state;
+    end
     endcase
 end
 
 // handle write
-always@(*)begin
-    axi_master_write_start = (w_state == w_processing);
-    axi_master_target_write_addr = dma_write_back_addr;
-    axi_master_target_write_burst_len = dma_write_back_burst_len;
+always@(posedge cpu_clk)begin
+    if(dma_write_back_happen)begin
+        axi_master_write_start <= (w_state == w_processing);
+        axi_master_target_write_addr <= dma_write_back_addr;
+        axi_master_target_write_burst_len <= dma_write_back_burst_len;
+    end else begin
+        axi_master_write_start <= axi_master_write_start && (cool_w < 3);
+        axi_master_target_write_addr <= axi_master_target_write_addr;
+        axi_master_target_write_burst_len <= axi_master_target_write_burst_len;
+    end
 end
 always@(*)begin
+    n_cool_w = cool_w;
     case(w_state)
     w_idle:begin
+        n_cool_w = 0;
         if(dma_write_back_happen && !axi_master_write_done) n_w_state = w_processing;
         else n_w_state = w_idle;
     end
     w_processing:begin
+        n_cool_w = (cool_w<=3)?cool_w+1: cool_w;
         if(axi_master_write_done) n_w_state = w_done;
         else n_w_state = w_processing;
     end
     w_done:begin
+        n_cool_w = cool_w;
         if(w_cnt >= dma_write_back_burst_len) n_w_state = w_idle;
         else n_w_state = w_done;
     end
-    default: n_w_state = w_state;
+    default: begin
+        n_cool_w = cool_w;
+        n_w_state = w_state;
+    end
     endcase
 end
 
@@ -135,11 +163,15 @@ always @(posedge cpu_clk) begin
         w_cnt <= 0;
         r_state <= r_idle;
         r_cnt <= 0;
+        cool_r <= 0;
+        cool_w <= 0;
     end else begin
         w_state <= n_w_state;
         w_cnt <= n_w_cnt;
         r_state <= n_r_state;
         r_cnt <= n_r_cnt;
+        cool_r <= n_cool_r;
+        cool_w <= n_cool_w;
     end
 end
 
