@@ -10,9 +10,11 @@ module axi_master #(
     input wire rst_n,
     // read control:
     input wire start_read,
+    output axi_master_rcv_read_start,
     input wire [ADDR_WIDTH-1:0] target_read_addr,
     input wire [READ_BURST_LEN-1:0] target_read_burst_len,
     output wire done_read,
+    input wire dma_rcv_read_done,
     // read address channel
     input wire ARREADY,
     output wire [ADDR_WIDTH-1:0] ARADDR,
@@ -33,9 +35,11 @@ module axi_master #(
     
     // write control:
     input wire start_write,
+    output axi_master_rcv_write_start,
     input wire [ADDR_WIDTH-1:0] target_write_addr,
     input wire [WRITE_BURST_LEN-1:0] target_write_burst_len,
     output wire done_write,
+    input wire dma_rcv_write_done,
     // write address channel
     input wire AWREADY,
     output wire [ADDR_WIDTH-1:0] AWADDR,
@@ -67,9 +71,11 @@ axi_master_read_channel #(
     .rst_n(rst_n),
     // read control
     .start(start_read),
+    .axi_master_rcv_read_start(axi_master_rcv_read_start),
     .target_read_addr(target_read_addr),
     .target_read_burst_len(target_read_burst_len),
     .done(done_read),
+    .dma_rcv_read_done(dma_rcv_read_done),
     // read address channel
     .ARREADY(ARREADY),
     .ARADDR(ARADDR),
@@ -98,9 +104,11 @@ axi_master_write_channel #(
     .rst_n(rst_n),
     // write control
     .start(start_write),
+    .axi_master_rcv_write_start(axi_master_rcv_write_start),
     .target_write_addr(target_write_addr),
     .target_write_burst_len(target_write_burst_len),
     .done(done_write),
+    .dma_rcv_write_done(dma_rcv_write_done),
     // write address channel
     .AWREADY(AWREADY),
     .AWADDR(AWADDR),

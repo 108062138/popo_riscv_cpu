@@ -8,9 +8,11 @@ module axi_master_read_channel #(
     input wire clk,
     input wire rst_n,
     input wire start,
+    output reg axi_master_rcv_read_start,
     input wire [ADDR_WIDTH-1:0] target_read_addr,
     input wire [READ_BURST_LEN-1:0] target_read_burst_len,
     output wire done,
+    input wire dma_rcv_read_done,
     // read address channel
     input wire ARREADY,
     output reg [ADDR_WIDTH-1:0] ARADDR,
@@ -77,6 +79,14 @@ always @(posedge clk) begin
         if(RVALID && RREADY) $display("read and about to send %d to dma", RDATA);
     end
 end
+
+always @(*) begin
+    axi_master_rcv_read_start = 0;
+    if(state==addr_handshaking || state==data_handshaking)begin
+        axi_master_rcv_read_start = 1;
+    end
+end
+
 // comb for rem target read addr
 always@(*)begin
     n_rem_target_read_addr = rem_target_read_addr;
@@ -102,7 +112,10 @@ always@(*)begin
         if(RVALID && RREADY && RLAST) n_state = raise_done;
         else n_state = data_handshaking;
     end
-    raise_done: n_state = idle;
+    raise_done: begin
+        if(dma_rcv_read_done) n_state = idle;
+        else n_state = raise_done;
+    end
     default: n_state = state;
     endcase
 end

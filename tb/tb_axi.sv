@@ -23,19 +23,6 @@ initial begin
     $dumpvars(0, tb_axi);
 end
 
-// main entry
-initial begin
-    reset_all();
-    clear_dma_setting();
-    $display("start write only");
-    write_only(.desire_addr(32'd8), .number_of_write(8'd20));
-    $display("finish write only");
-    clear_dma_setting();
-    $display("start read only");
-    read_only(.desire_addr(32'd15), .number_of_read(8'd1));
-    clear_dma_setting();
-end
-
 parameter ADDR_WIDTH = 32;
 parameter READ_CHANNEL_WIDTH = 32;
 parameter READ_BURST_LEN = 8;
@@ -54,6 +41,32 @@ wire dma_write_back_done;
 reg [ADDR_WIDTH-1:0] dma_write_back_addr;
 reg [WRITE_BURST_LEN-1:0] dma_write_back_burst_len;
 
+// main entry
+initial begin
+    reset_all();
+    clear_dma_setting();
+    $display("start write only");
+    write_only(.desire_addr(32'd8), .number_of_write(8'd20));
+    $display("finish write only");
+    clear_dma_setting();
+    $display("start read only");
+    read_only(.desire_addr(32'd15), .number_of_read(8'd3));
+    $display("finish read only");
+    clear_dma_setting();
+    $display("start read only");
+    read_only(.desire_addr(32'd8), .number_of_read(8'd16));
+    $display("finish read only");
+    clear_dma_setting();
+    $display("start read only");
+    read_only(.desire_addr(32'd8), .number_of_read(8'd1));
+    $display("finish read only");
+    clear_dma_setting();
+    $display("start mix");
+    write_and_read_different_place();
+    $display("end mix");
+    clear_dma_setting();
+end
+
 event reset_done;
 task reset_all();
 fork
@@ -64,6 +77,19 @@ fork
     end
 join
 -> reset_done;
+endtask
+
+event write_and_read_different_place_done;
+task write_and_read_different_place;
+fork
+    begin
+        write_only(.desire_addr(32'd2), .number_of_write(8'd10));
+    end
+    begin
+        read_only(.desire_addr(32'd25), .number_of_read(8'd20));
+    end
+join
+->write_and_read_different_place_done;
 endtask
 
 event clear_dma_setting_done;
@@ -89,7 +115,7 @@ fork
         dma_write_back_addr = desire_addr;
         dma_write_back_burst_len = number_of_write - 1;
         dma_write_back_happen = 1;
-        while (!dma_write_back_done) @(negedge cpu_clk);
+        while (!dma_write_back_done) @(posedge cpu_clk);
     end
 join
 -> write_only_done;
@@ -104,10 +130,7 @@ fork
         dma_page_fault_addr = desire_addr;
         dma_page_fault_burst_len = number_of_read - 1;
         dma_page_fault_happen = 1;
-        repeat(4) @(negedge cpu_clk);
-        $display("wwwwww");
-
-        while (dma_page_fault_done) @(negedge cpu_clk);
+        while (!dma_page_fault_done) @(posedge cpu_clk);
     end
 join
 -> read_only_done;

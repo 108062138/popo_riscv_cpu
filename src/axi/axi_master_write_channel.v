@@ -8,6 +8,7 @@ module axi_master_write_channel #(
     input wire clk,
     input wire rst_n,
     input wire start,
+    output reg axi_master_rcv_write_start,
     input wire [ADDR_WIDTH-1:0] target_write_addr,
     input wire [WRITE_BURST_LEN-1:0] target_write_burst_len,
     // dma 2 master afifo
@@ -15,6 +16,7 @@ module axi_master_write_channel #(
     output wire dma2master_afifo_rpull,
     input wire dma2master_afifo_rempty,
     output wire done,
+    input wire dma_rcv_write_done,
     // write address channel
     input wire AWREADY,
     output reg [ADDR_WIDTH-1:0] AWADDR,
@@ -72,6 +74,12 @@ always@(*)begin
         n_rem_target_burst_len = target_write_burst_len;
     end
 end
+always @(*) begin
+    axi_master_rcv_write_start = 0;
+    if(state==addr_handshaking || state==data_handshaking)begin
+        axi_master_rcv_write_start = 1;
+    end
+end
 
 // W comb
 always@(*)begin
@@ -123,7 +131,8 @@ always@(*)begin
         else n_state = resp;
     end
     raise_done:begin
-        n_state = idle;
+        if(dma_rcv_write_done) n_state = idle;
+        else n_state = raise_done;
     end
     default: n_state = state;
     endcase
