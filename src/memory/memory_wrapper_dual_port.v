@@ -22,13 +22,13 @@ end
 
 always@(posedge clk)begin
     if(!rst_n)begin
-        rdata <= 0;
+        rdata <= #10 0;
     end else begin
         if(ren)begin
-            if(raddr==waddr && wen) rdata <= wdata;
-            else rdata <= mem[raddr];
+            if(raddr==waddr && wen) rdata <= #10 wdata;
+            else rdata <= #10 mem[raddr];
         end else begin
-            rdata <= 0;
+            rdata <= #10 0;
         end
     end
 end

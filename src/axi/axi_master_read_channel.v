@@ -74,11 +74,11 @@ always@(*)begin//123456
         end
     end
 end
-always @(posedge clk) begin
-    if(state==data_handshaking)begin
-        if(RVALID && RREADY) $display("read and about to send %d to dma", RDATA);
-    end
-end
+// always @(posedge clk) begin
+//     if(state==data_handshaking)begin
+//         if(RVALID && RREADY) $display("read and about to send %d to dma", RDATA);
+//     end
+// end
 
 always @(*) begin
     axi_master_rcv_read_start = 0;

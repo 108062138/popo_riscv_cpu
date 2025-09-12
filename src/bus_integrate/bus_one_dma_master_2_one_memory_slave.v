@@ -84,51 +84,51 @@ wire [WRITE_CHANNEL_WIDTH-1:0] dma2master_afifo_rdata;
 wire dma2master_afifo_rpull;
 wire dma2master_afifo_rempty;
 
-double_sync #(.ADDR_WIDTH(1)) u_double_sync_dsync_axi_master_read_start(
+double_sync #(.DSYNC_WIDTH(1)) u_double_sync_dsync_axi_master_read_start(
     .clk(sys_clk),
     .rst_n(sys_rst_n),
     .din(axi_master_read_start),
     .dout(dsync_axi_master_read_start)
 );
-double_sync #(.ADDR_WIDTH(1)) u_double_sync_dsync_axi_master_rcv_read_start(
+double_sync #(.DSYNC_WIDTH(1)) u_double_sync_dsync_axi_master_rcv_read_start(
     .clk(cpu_clk),
     .rst_n(cpu_rst_n),
     .din(axi_master_rcv_read_start),
     .dout(dsync_axi_master_rcv_read_start)
 );
 
-double_sync #(.ADDR_WIDTH(1)) u_double_sync_dsync_axi_master_read_done(
+double_sync #(.DSYNC_WIDTH(1)) u_double_sync_dsync_axi_master_read_done(
     .clk(cpu_clk),
     .rst_n(cpu_rst_n),
     .din(axi_master_read_done),
     .dout(dsync_axi_master_read_done)
 );
-double_sync #(.ADDR_WIDTH(1)) u_double_sync_dsync_dma_rcv_read_done(
+double_sync #(.DSYNC_WIDTH(1)) u_double_sync_dsync_dma_rcv_read_done(
     .clk(sys_clk),
     .rst_n(sys_rst_n),
     .din(dma_rcv_read_done),
     .dout(dsync_dma_rcv_read_done)
 );
 
-double_sync #(.ADDR_WIDTH(1)) u_double_sync_dsync_axi_master_write_start(
+double_sync #(.DSYNC_WIDTH(1)) u_double_sync_dsync_axi_master_write_start(
     .clk(sys_clk),
     .rst_n(sys_rst_n),
     .din(axi_master_write_start),
     .dout(dsync_axi_master_write_start)
 );
-double_sync #(.ADDR_WIDTH(1)) u_double_sync_dsync_axi_master_rcv_write_start(
+double_sync #(.DSYNC_WIDTH(1)) u_double_sync_dsync_axi_master_rcv_write_start(
     .clk(cpu_clk),
     .rst_n(cpu_rst_n),
     .din(axi_master_rcv_write_start),
     .dout(dsync_axi_master_rcv_write_start)
 );
-double_sync #(.ADDR_WIDTH(1)) u_double_sync_dsync_axi_master_write_done(
+double_sync #(.DSYNC_WIDTH(1)) u_double_sync_dsync_axi_master_write_done(
     .clk(cpu_clk),
     .rst_n(cpu_rst_n),
     .din(axi_master_write_done),
     .dout(dsync_axi_master_write_done)
 );
-double_sync #(.ADDR_WIDTH(1)) u_double_sync_dsync_dma_rcv_write_done(
+double_sync #(.DSYNC_WIDTH(1)) u_double_sync_dsync_dma_rcv_write_done(
     .clk(sys_clk),
     .rst_n(sys_rst_n),
     .din(dma_rcv_write_done),

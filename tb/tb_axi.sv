@@ -1,3 +1,5 @@
+`timescale 1ns/1ps
+
 module tb_axi();
 
 parameter CPU_CYC = 10;
@@ -107,7 +109,7 @@ task clear_dma_setting();
 endtask
 
 event write_only_done;
-task write_only();
+task automatic write_only();
 input [WRITE_BURST_LEN-1:0] number_of_write;
 input [ADDR_WIDTH-1:0] desire_addr;
 fork
@@ -120,17 +122,25 @@ fork
 join
 -> write_only_done;
 endtask
-
 event read_only_done;
-task read_only();
+task automatic read_only();
 input [WRITE_BURST_LEN-1:0] number_of_read;
 input [ADDR_WIDTH-1:0] desire_addr;
 fork
     begin
+        integer tmp_cnt = 0;
         dma_page_fault_addr = desire_addr;
         dma_page_fault_burst_len = number_of_read - 1;
         dma_page_fault_happen = 1;
-        while (!dma_page_fault_done) @(posedge cpu_clk);
+        while (!dma_page_fault_done)begin
+            @(posedge cpu_clk);
+            if(tb_axi.popo_bus.u_dma.r_state==2 || tb_axi.popo_bus.u_dma.r_state==3)begin
+                if(!tb_axi.popo_bus.u_dma.master2dma_afifo_rempty)begin
+                    $display("see %d at tb_axi and its addr should be %d", tb_axi.popo_bus.u_dma.master2dma_afifo_rdata, tmp_cnt + desire_addr); //tb_axi.popo_bus.u_axi_slave.u_slave_mem.mem[tmp_cnt + desire_addr],
+                    tmp_cnt = tmp_cnt + 1;
+                end
+            end
+        end
     end
 join
 -> read_only_done;

@@ -34,7 +34,7 @@ write_pointer_handler #(
 );
 
 double_sync #(
-    .ADDR_WIDTH(ADDR_WIDTH + 1)
+    .DSYNC_WIDTH(ADDR_WIDTH + 1)
 ) u_sync_r2w (
     .clk(wclk),
     .rst_n(wrst_n),
@@ -56,7 +56,7 @@ fifo_memory #(
 );
 
 double_sync #(
-    .ADDR_WIDTH(ADDR_WIDTH + 1)
+    .DSYNC_WIDTH(ADDR_WIDTH + 1)
 ) u_sync_w2r (
     .clk(rclk),
     .rst_n(rrst_n),

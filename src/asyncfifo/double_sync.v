@@ -1,13 +1,13 @@
 module double_sync #(
-    parameter ADDR_WIDTH = 4
+    parameter DSYNC_WIDTH = 4
 )(
     input wire clk,
     input wire rst_n,
-    input wire [ADDR_WIDTH-1:0] din,
-    output reg [ADDR_WIDTH-1:0] dout
+    input wire [DSYNC_WIDTH-1:0] din,
+    output reg [DSYNC_WIDTH-1:0] dout
 );
 
-reg [ADDR_WIDTH-1:0] tmp;
+reg [DSYNC_WIDTH-1:0] tmp;
 
 always @(posedge clk) begin
     if(!rst_n) {dout, tmp} <= 0;
