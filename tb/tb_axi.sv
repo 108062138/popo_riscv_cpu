@@ -136,7 +136,7 @@ fork
             @(posedge cpu_clk);
             if(tb_axi.popo_bus.u_dma.r_state==2 || tb_axi.popo_bus.u_dma.r_state==3)begin
                 if(!tb_axi.popo_bus.u_dma.master2dma_afifo_rempty)begin
-                    $display("see %d at tb_axi and its addr should be %d", tb_axi.popo_bus.u_dma.master2dma_afifo_rdata, tmp_cnt + desire_addr); //tb_axi.popo_bus.u_axi_slave.u_slave_mem.mem[tmp_cnt + desire_addr],
+                    $display("see %d at tb_axi and its addr should be %d", tb_axi.popo_bus.u_dma.master2dma_afifo_rdata, tmp_cnt + desire_addr+50); //tb_axi.popo_bus.u_axi_slave.u_slave_mem.mem[tmp_cnt + desire_addr],
                     tmp_cnt = tmp_cnt + 1;
                 end
             end
