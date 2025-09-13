@@ -20,12 +20,12 @@ initial begin
     $readmemh("/home/popo/Desktop/popo_train_cpu/popo_cpu/tb/inst.mem", mem);
 end
 always @(*) begin
-    inst_mem_hazard = #5 0;
-    INST = #5 mem[PC];
+    inst_mem_hazard = #2 0;
+    INST = #2 mem[PC>>2]; // PC/4 is the instruction address
 end
 always @(posedge cpu_clk) begin
     if(inst_mem_write)begin
-        mem[dma_inst_mem_waddr] <= #5 dma_inst_mem_wdata;
+        mem[dma_inst_mem_waddr] <= #2 dma_inst_mem_wdata;
     end
 end
 
