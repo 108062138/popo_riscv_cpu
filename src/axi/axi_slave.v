@@ -103,7 +103,7 @@ axi_slave_write_channel #(
     .mem_wdata(mem_wdata)
 );
 
-memory_wrapper_dual_port #(
+sram_wrapper_dual_port #(
     .INIT_BY(0),
     .DATA_WIDTH(WRITE_CHANNEL_WIDTH), 
     .ADDR_WIDTH(ADDR_WIDTH), 

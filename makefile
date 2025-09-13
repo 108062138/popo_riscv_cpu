@@ -2,8 +2,10 @@ export CORE_ROOT=$(shell pwd)
 # ==== Config ====
 CHIP_TB_FILE   	  	:= tb/tb_chip.sv
 AXI_TB_FILE    	  	:= tb/tb_axi.sv
-SRCS      		  	:= $(wildcard src/*.v)
+CHIP_SRCS           := src/chip.v
 AXI_SRCS  		  	:= $(wildcard src/axi/*.v)
+L1_CACHE_SRCS  		:= $(wildcard src/L1_cache/*.v)
+CPU_SRCS            := $(wildcard src/cpu/*.v)
 ASYNCFIFO_SRCS    	:= $(wildcard src/asyncfifo/*.v)
 BUS_INTEGRATE_SRCS	:= $(wildcard src/bus_integrate/*.v)
 MEMORY_SRCS			:= $(wildcard src/memory/*.v)
@@ -16,9 +18,9 @@ SIM_ASYNCFIFO     	:= $(BUILD)/Vtb_asyncfifo
 
 all: run
 
-$(SIM_CHIP): $(CHIP_TB_FILE) $(SRCS) | $(BUILD)
+$(SIM_CHIP): tb/tb_chip.sv $(CHIP_SRCS) $(L1_CACHE_SRCS) $(CPU_SRCS) | $(BUILD)
 	@echo "[VERILATOR] Compile -> $@"
-	verilator --trace-vcd --binary -j 32 --top-module tb_chip $(CHIP_TB_FILE) $(SRCS)
+	verilator --trace-vcd --binary -j 32 --top-module tb_chip tb/tb_chip.sv $(CHIP_SRCS) $(L1_CACHE_SRCS) $(CPU_SRCS)
 
 $(SIM_AXI): tb/tb_axi.sv $(AXI_SRCS) $(ASYNCFIFO_SRCS) $(BUS_INTEGRATE_SRCS) $(MEMORY_SRCS)| $(BUILD)
 	@echo "[VERILATOR] Compile -> $@"
