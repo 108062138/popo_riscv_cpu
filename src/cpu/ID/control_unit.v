@@ -37,10 +37,28 @@ always @(*) begin
     meet_branch_ID = 0;
     if(opcode==`BRANCH)
         meet_branch_ID = 1;
-    /*
-    alu ctrl not fix yet
-    */
-    alu_ctrl_ID = 0; // default add~~~
+
+    alu_ctrl_ID = 4'b0000; // default add
+    if(opcode==`CAL_R)begin
+        case(funct3)
+            3'b000: begin
+                if(!funct7[5]) alu_ctrl_ID = 4'b0000; // add
+                else alu_ctrl_ID = 4'b0001; // sub
+            end
+            3'b001: alu_ctrl_ID = 4'b0010; // sll
+            3'b010: alu_ctrl_ID = 4'b0011; // slt
+            3'b011: alu_ctrl_ID = 4'b0100; // sltu
+            3'b100: alu_ctrl_ID = 4'b0101; // xor
+            3'b101: begin
+                if(funct7[5]) alu_ctrl_ID = 4'b0110; // srl
+                else alu_ctrl_ID = 4'b0111; // sra
+            end
+            3'b110: alu_ctrl_ID = 4'b1000; // or
+            3'b111: alu_ctrl_ID = 4'b1001; // and
+            default: alu_ctrl_ID = 4'b0000; // default add for R-type
+        endcase
+    end
+
 
     alu_sel_rs1_ID = 0; // send reg[rs1] to ALU
     if(opcode==`AUIPC || opcode==`JAL || opcode==`BRANCH) // send PC to ALU 

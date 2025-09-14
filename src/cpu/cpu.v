@@ -176,6 +176,8 @@ wire reg_write_EX;
 wire mem_write_EX;
 wire [1:0] result_sel_EX;
 wire signed [DATA_WIDTH-1:0] alu_res_EX;
+wire [REGISTER_ADDR_WIDTH-1:0] rs1_EX;
+wire [REGISTER_ADDR_WIDTH-1:0] rs2_EX;
 wire [REGISTER_ADDR_WIDTH-1:0] rd_EX;
 wire signed [DATA_WIDTH-1:0] write_data_EX;
 wire [INST_ADDR_WIDTH-1:0] PC_plus_4_EX;
@@ -201,17 +203,19 @@ EX_datapath #( .INST_WIDTH(INST_WIDTH), .INST_ADDR_WIDTH(INST_ADDR_WIDTH), .DATA
     .RD2D_ID_EX_o(RD2D_ID_EX_o),
 
     // for forward rs1
-    .forward_detect_EX_rs1(3'b0),
-    .alu_res_EX_MEM_o(32'b0),
-    .result_WB(32'b0),
+    .forward_detect_EX_rs1(forward_detect_rs1),
+    .alu_res_EX_MEM_o(alu_res_MEM),
+    .result_WB(result_WB),
     // for forward rs2
-    .forward_detect_EX_rs2(3'b0),
+    .forward_detect_EX_rs2(forward_detect_rs2),
 
     .INST_EX(INST_EX),
     .reg_write_EX(reg_write_EX),
     .mem_write_EX(mem_write_EX),
     .result_sel_EX(result_sel_EX),
     .alu_res_EX(alu_res_EX),
+    .rs1_EX(rs1_EX),
+    .rs2_EX(rs2_EX),
     .rd_EX(rd_EX),
     .write_data_EX(write_data_EX),
     .PC_plus_4_EX(PC_plus_4_EX)
@@ -332,9 +336,25 @@ wire flush_IF_ID, flush_ID_EX;
 
 hazard_detection u_hazard_detction ( .inst_mem_hazard(inst_mem_hazard), .data_mem_hazard(data_mem_hazard), .stall_PC_IF(stall_PC_IF), .stall_IF_ID(stall_IF_ID), .flush_IF_ID(flush_IF_ID), .flush_ID_EX(flush_ID_EX));
 
+wire [2:0] forward_detect_rs1;
+wire [2:0] forward_detect_rs2;
+
+forward_detection #(.REGISTER_ADDR_WIDTH(REGISTER_ADDR_WIDTH)) u_forward_detection (
+    .rs1_ID(rs1_ID),
+    .rs2_ID(rs2_ID),
+    .rs1_EX(rs1_EX),
+    .rs2_EX(rs2_EX),
+    .rd_MEM(rd_MEM),
+    .rd_WB(rd_WB),
+    .forward_detect_rs1(forward_detect_rs1),
+    .forward_detect_rs2(forward_detect_rs2)
+);
+
 regfile #(.INIT_STYLE(1), .REGISTER_WIDTH(REGISTER_WIDTH), .REGISTER_ADDR_WIDTH(REGISTER_ADDR_WIDTH)) u_regfile (
     .cpu_clk(cpu_clk),
     .cpu_rst_n(cpu_rst_n),
+    .forward_detect_rs1(forward_detect_rs1),
+    .forward_detect_rs2(forward_detect_rs2),
     .rs1_addr(rs1_ID),
     .rs2_addr(rs2_ID),
     .rs1_data(RD1D_ID),

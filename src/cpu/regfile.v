@@ -1,3 +1,5 @@
+`include "riscv_defs.vh"
+
 module regfile #(
     parameter INIT_STYLE = 2,
     parameter REGISTER_WIDTH = 32,
@@ -5,10 +7,12 @@ module regfile #(
 )(
     input cpu_clk,
     input cpu_rst_n,
+    input wire [2:0] forward_detect_rs1,
+    input wire [2:0] forward_detect_rs2,
     input wire [REGISTER_ADDR_WIDTH-1:0] rs1_addr,
     input wire [REGISTER_ADDR_WIDTH-1:0] rs2_addr,
-    output wire [REGISTER_WIDTH-1:0] rs1_data,
-    output wire [REGISTER_WIDTH-1:0] rs2_data,
+    output reg [REGISTER_WIDTH-1:0] rs1_data,
+    output reg [REGISTER_WIDTH-1:0] rs2_data,
     input wire [REGISTER_ADDR_WIDTH-1:0] wd_addr,
     input wire we,
     input wire [REGISTER_WIDTH-1:0] wd_data
@@ -27,6 +31,12 @@ always@(posedge cpu_clk)begin
         rf[0] <= 0;
     end
 end
-assign rs1_data = rf[rs1_addr];
-assign rs2_data = rf[rs2_addr];
+
+always @(*) begin
+    rs1_data = rf[rs1_addr];
+    if(forward_detect_rs1[`FORWARD_COLLISION_IN_ID]) rs1_data = wd_data;
+    rs2_data = rf[rs2_addr];
+    if(forward_detect_rs2[`FORWARD_COLLISION_IN_ID]) rs2_data = wd_data;
+end
+
 endmodule

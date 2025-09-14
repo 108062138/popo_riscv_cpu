@@ -4,7 +4,7 @@ module tb_chip();
 
 parameter CPU_CYC = 10;
 parameter SYS_CYC = 40;
-parameter max_cyc = 30;
+parameter max_cyc = 60;
 reg cpu_clk;
 reg sys_clk;
 reg cpu_rst_n;
