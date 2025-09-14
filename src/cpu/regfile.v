@@ -9,9 +9,9 @@ module regfile #(
     input wire [REGISTER_ADDR_WIDTH-1:0] rs2_addr,
     output wire [REGISTER_WIDTH-1:0] rs1_data,
     output wire [REGISTER_WIDTH-1:0] rs2_data,
-    input wire [REGISTER_ADDR_WIDTH-1:0] rd_addr,
+    input wire [REGISTER_ADDR_WIDTH-1:0] wd_addr,
     input wire we,
-    input wire [REGISTER_WIDTH-1:0] rd_data
+    input wire [REGISTER_WIDTH-1:0] wd_data
 );
 
 reg [REGISTER_WIDTH-1:0] rf [0:2**REGISTER_ADDR_WIDTH-1];
@@ -23,7 +23,7 @@ always@(posedge cpu_clk)begin
         else if(INIT_STYLE==1) for(i=0;i<2**REGISTER_ADDR_WIDTH;i=i+1) rf[i] <= i*3;
         else for(i=0;i<2**REGISTER_ADDR_WIDTH;i=i+1) rf[i] <= 0;
     end else begin
-        if(we && rd_addr!=0) rf[rd_addr] <= rd_data;
+        if(we && wd_addr!=0) rf[wd_addr] <= wd_data;
         rf[0] <= 0;
     end
 end

@@ -14,40 +14,40 @@ module ID_EX_pipeline #(
     input wire [INST_ADDR_WIDTH-1:0] PC_ID_EX_i,
     input wire [INST_ADDR_WIDTH-1:0] PC_plus_4_ID_EX_i,
     input wire [INST_WIDTH-1:0] INST_ID_EX_i,
-    input wire [5-1:0] rs1_ID_EX_i,
-    input wire [5-1:0] rs2_ID_EX_i,
-    input wire [5-1:0] rd_ID_EX_i,
+    input wire [REGISTER_ADDR_WIDTH-1:0] rs1_ID_EX_i,
+    input wire [REGISTER_ADDR_WIDTH-1:0] rs2_ID_EX_i,
+    input wire [REGISTER_ADDR_WIDTH-1:0] rd_ID_EX_i,
     input signed [DATA_WIDTH-1:0] imm_ID_EX_i,
     input wire reg_write_ID_EX_i,
     input wire [1:0] result_sel_ID_EX_i,
     input wire mem_write_ID_EX_i,
     input wire uncond_jump_ID_EX_i,
     input wire meet_branch_ID_EX_i,
-    input wire alu_ctrl_ID_EX_i,
-    input wire [1:0] alu_sel_0_ID_EX_i,
-    input wire [1:0] alu_sel_1_ID_EX_i,
+    input wire [3:0] alu_ctrl_ID_EX_i,
+    input wire [1:0] alu_sel_rs1_ID_EX_i,
+    input wire [1:0] alu_sel_rs2_ID_EX_i,
     input wire pc_jal_sel_ID_EX_i,
-    input wire [REGISTER_WIDTH-1:0] RD1D_ID_EX_i,
-    input wire [REGISTER_WIDTH-1:0] RD2D_ID_EX_i,
+    input wire [DATA_WIDTH-1:0] RD1D_ID_EX_i,
+    input wire [DATA_WIDTH-1:0] RD2D_ID_EX_i,
 
     output reg [INST_ADDR_WIDTH-1:0] PC_ID_EX_o,
     output reg [INST_ADDR_WIDTH-1:0] PC_plus_4_ID_EX_o,
     output reg [INST_WIDTH-1:0] INST_ID_EX_o,
-    output reg [5-1:0] rs1_ID_EX_o,
-    output reg [5-1:0] rs2_ID_EX_o,
-    output reg [5-1:0] rd_ID_EX_o,
+    output reg [REGISTER_ADDR_WIDTH-1:0] rs1_ID_EX_o,
+    output reg [REGISTER_ADDR_WIDTH-1:0] rs2_ID_EX_o,
+    output reg [REGISTER_ADDR_WIDTH-1:0] rd_ID_EX_o,
     output reg signed [DATA_WIDTH-1:0] imm_ID_EX_o,
     output reg reg_write_ID_EX_o,
     output reg [1:0] result_sel_ID_EX_o,
     output reg mem_write_ID_EX_o,
     output reg uncond_jump_ID_EX_o,
     output reg meet_branch_ID_EX_o,
-    output reg alu_ctrl_ID_EX_o,
-    output reg [1:0] alu_sel_0_ID_EX_o,
-    output reg [1:0] alu_sel_1_ID_EX_o,
+    output reg [3:0] alu_ctrl_ID_EX_o,
+    output reg [1:0] alu_sel_rs1_ID_EX_o,
+    output reg [1:0] alu_sel_rs2_ID_EX_o,
     output reg pc_jal_sel_ID_EX_o,
-    output reg [REGISTER_WIDTH-1:0] RD1D_ID_EX_o,
-    output reg [REGISTER_WIDTH-1:0] RD2D_ID_EX_o
+    output reg [DATA_WIDTH-1:0] RD1D_ID_EX_o,
+    output reg [DATA_WIDTH-1:0] RD2D_ID_EX_o
 );
 
 always @(posedge cpu_clk) begin
@@ -65,8 +65,8 @@ always @(posedge cpu_clk) begin
         uncond_jump_ID_EX_o <= 0;
         meet_branch_ID_EX_o <= 0;
         alu_ctrl_ID_EX_o <= 0;
-        alu_sel_0_ID_EX_o <= 0;
-        alu_sel_1_ID_EX_o <= 0;
+        alu_sel_rs1_ID_EX_o <= 0;
+        alu_sel_rs2_ID_EX_o <= 0;
         pc_jal_sel_ID_EX_o <= 0;
         RD1D_ID_EX_o <= 0;
         RD2D_ID_EX_o <= 0;
@@ -85,8 +85,8 @@ always @(posedge cpu_clk) begin
             uncond_jump_ID_EX_o <= 0;
             meet_branch_ID_EX_o <= 0;
             alu_ctrl_ID_EX_o <= 0;
-            alu_sel_0_ID_EX_o <= 0;
-            alu_sel_1_ID_EX_o <= 0;
+            alu_sel_rs1_ID_EX_o <= 0;
+            alu_sel_rs2_ID_EX_o <= 0;
             pc_jal_sel_ID_EX_o <= 0;
             RD1D_ID_EX_o <= 0;
             RD2D_ID_EX_o <= 0;
@@ -104,8 +104,8 @@ always @(posedge cpu_clk) begin
             uncond_jump_ID_EX_o <= uncond_jump_ID_EX_i;
             meet_branch_ID_EX_o <= meet_branch_ID_EX_i;
             alu_ctrl_ID_EX_o <= alu_ctrl_ID_EX_i;
-            alu_sel_0_ID_EX_o <= alu_sel_0_ID_EX_i;
-            alu_sel_1_ID_EX_o <= alu_sel_1_ID_EX_i;
+            alu_sel_rs1_ID_EX_o <= alu_sel_rs1_ID_EX_i;
+            alu_sel_rs2_ID_EX_o <= alu_sel_rs2_ID_EX_i;
             pc_jal_sel_ID_EX_o <= pc_jal_sel_ID_EX_i;
             RD1D_ID_EX_o <= RD1D_ID_EX_i;
             RD2D_ID_EX_o <= RD2D_ID_EX_i;

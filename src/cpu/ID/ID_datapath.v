@@ -22,9 +22,9 @@ module ID_datapath #(
     output wire mem_write_ID,
     output wire uncond_jump_ID,
     output wire meet_branch_ID,
-    output wire alu_ctrl_ID,
-    output wire [1:0] alu_sel_0_ID,
-    output wire [1:0] alu_sel_1_ID,
+    output wire [3:0] alu_ctrl_ID,
+    output wire [1:0] alu_sel_rs1_ID,
+    output wire [1:0] alu_sel_rs2_ID,
     output wire pc_jal_sel_ID
 );
 
@@ -61,8 +61,8 @@ control_unit u_control_unit (
     .uncond_jump_ID(uncond_jump_ID),
     .meet_branch_ID(meet_branch_ID),
     .alu_ctrl_ID(alu_ctrl_ID),
-    .alu_sel_0_ID(alu_sel_0_ID),
-    .alu_sel_1_ID(alu_sel_1_ID),
+    .alu_sel_rs1_ID(alu_sel_rs1_ID),
+    .alu_sel_rs2_ID(alu_sel_rs2_ID),
     .pc_jal_sel_ID(pc_jal_sel_ID)
 );
 

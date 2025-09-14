@@ -19,4 +19,9 @@
 `define CAL_I  7'b0010011
 `define CAL_R  7'b0110011
 
+
+`define FORWARD_COLLISION_IN_MEM 0
+`define FORWARD_COLLISION_IN_WB 1
+`define FORWARD_COLLISION_IN_ID 2
+
 `endif
