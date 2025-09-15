@@ -16,6 +16,7 @@ module MEM_WB_pipeline #(
     input wire [DATA_WIDTH-1:0] data_mem_rdata_MEM_WB_i,
     input wire [REGISTER_ADDR_WIDTH-1:0] rd_MEM_WB_i,
     input wire [INST_ADDR_WIDTH-1:0] PC_plus_4_MEM_WB_i,
+    input wire [2:0] funct3_MEM_WB_i,
 
     output reg [INST_WIDTH-1:0] INST_MEM_WB_o,
     output reg reg_write_MEM_WB_o,
@@ -23,7 +24,8 @@ module MEM_WB_pipeline #(
     output reg signed [DATA_WIDTH-1:0] alu_res_MEM_WB_o,
     output reg [DATA_WIDTH-1:0] data_mem_rdata_MEM_WB_o,
     output reg [REGISTER_ADDR_WIDTH-1:0] rd_MEM_WB_o,
-    output reg [INST_ADDR_WIDTH-1:0] PC_plus_4_MEM_WB_o
+    output reg [INST_ADDR_WIDTH-1:0] PC_plus_4_MEM_WB_o,
+    output reg [2:0] funct3_MEM_WB_o
 );
 
 always @(posedge cpu_clk) begin

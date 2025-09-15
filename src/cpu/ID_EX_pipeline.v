@@ -21,7 +21,7 @@ module ID_EX_pipeline #(
     input wire reg_write_ID_EX_i,
     input wire [1:0] result_sel_ID_EX_i,
     input wire mem_write_ID_EX_i,
-    input wire uncond_jump_ID_EX_i,
+    input wire [1:0] uncond_jump_ID_EX_i,
     input wire meet_branch_ID_EX_i,
     input wire [3:0] alu_ctrl_ID_EX_i,
     input wire [1:0] alu_sel_rs1_ID_EX_i,
@@ -29,6 +29,7 @@ module ID_EX_pipeline #(
     input wire pc_jal_sel_ID_EX_i,
     input wire [DATA_WIDTH-1:0] RD1D_ID_EX_i,
     input wire [DATA_WIDTH-1:0] RD2D_ID_EX_i,
+    input wire [2:0] funct3_ID_EX_i,
 
     output reg [INST_ADDR_WIDTH-1:0] PC_ID_EX_o,
     output reg [INST_ADDR_WIDTH-1:0] PC_plus_4_ID_EX_o,
@@ -40,14 +41,15 @@ module ID_EX_pipeline #(
     output reg reg_write_ID_EX_o,
     output reg [1:0] result_sel_ID_EX_o,
     output reg mem_write_ID_EX_o,
-    output reg uncond_jump_ID_EX_o,
+    output reg [1:0] uncond_jump_ID_EX_o,
     output reg meet_branch_ID_EX_o,
     output reg [3:0] alu_ctrl_ID_EX_o,
     output reg [1:0] alu_sel_rs1_ID_EX_o,
     output reg [1:0] alu_sel_rs2_ID_EX_o,
     output reg pc_jal_sel_ID_EX_o,
     output reg [DATA_WIDTH-1:0] RD1D_ID_EX_o,
-    output reg [DATA_WIDTH-1:0] RD2D_ID_EX_o
+    output reg [DATA_WIDTH-1:0] RD2D_ID_EX_o,
+    output reg [2:0] funct3_ID_EX_o
 );
 
 always @(posedge cpu_clk) begin
@@ -70,6 +72,7 @@ always @(posedge cpu_clk) begin
         pc_jal_sel_ID_EX_o <= 0;
         RD1D_ID_EX_o <= 0;
         RD2D_ID_EX_o <= 0;
+        funct3_ID_EX_o <= 0;
     end else begin
         if(flush_ID_EX)begin
             PC_ID_EX_o <= 0;
@@ -90,6 +93,7 @@ always @(posedge cpu_clk) begin
             pc_jal_sel_ID_EX_o <= 0;
             RD1D_ID_EX_o <= 0;
             RD2D_ID_EX_o <= 0;
+            funct3_ID_EX_o <= 0;
         end else begin
             PC_ID_EX_o <= PC_ID_EX_i;
             PC_plus_4_ID_EX_o <= PC_plus_4_ID_EX_i;
@@ -109,6 +113,7 @@ always @(posedge cpu_clk) begin
             pc_jal_sel_ID_EX_o <= pc_jal_sel_ID_EX_i;
             RD1D_ID_EX_o <= RD1D_ID_EX_i;
             RD2D_ID_EX_o <= RD2D_ID_EX_i;
+            funct3_ID_EX_o <= funct3_ID_EX_i;
         end
     end
 end

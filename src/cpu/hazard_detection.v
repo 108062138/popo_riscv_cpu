@@ -9,6 +9,8 @@ module hazard_detection #(parameter REGISTER_ADDR_WIDTH = 5)(
     input wire [REGISTER_ADDR_WIDTH-1:0] rs2_ID,
     input wire [REGISTER_ADDR_WIDTH-1:0] rd_EX,
     input wire [1:0] result_sel_EX,
+    input wire PC_take_branch_EX,
+    input wire PC_take_jalr_EX,
     // output
     output reg stall_PC_IF,
     output reg stall_IF_ID,
@@ -35,6 +37,11 @@ always @(*) begin
             stall_IF_ID = 1;
             flush_ID_EX = 1;
         end
+    end
+
+    if(PC_take_branch_EX || PC_take_jalr_EX)begin
+        flush_IF_ID = 1;
+        flush_ID_EX = 1;
     end
 end
 

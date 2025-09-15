@@ -15,11 +15,13 @@ module WB_datapath #(
     input wire [DATA_WIDTH-1:0] data_mem_rdata_MEM_WB_o,
     input wire [REGISTER_ADDR_WIDTH-1:0] rd_MEM_WB_o,
     input wire [INST_ADDR_WIDTH-1:0] PC_plus_4_MEM_WB_o,
+    input wire [2:0] funct3_MEM_WB_o,
 
     output reg [INST_WIDTH-1:0] INST_WB,
     output reg reg_write_WB,
     output reg [REGISTER_ADDR_WIDTH-1:0] rd_WB,
-    output reg [DATA_WIDTH-1:0] result_WB
+    output reg [DATA_WIDTH-1:0] result_WB,
+    output reg [2:0] funct3_WB
 );
 
 reg [1:0] result_sel_WB;
@@ -36,6 +38,7 @@ always @(*) begin
     data_mem_rdata_WB = data_mem_rdata_MEM_WB_o;
     rd_WB = rd_MEM_WB_o;
     PC_plus_4_WB = PC_plus_4_MEM_WB_o;
+    funct3_WB = funct3_MEM_WB_o;
 end
 
 always @(*) begin

@@ -1,4 +1,4 @@
-PC_ID_EX_omodule EX_datapath #(
+module EX_datapath #(
     parameter INST_WIDTH = 32,
     parameter INST_ADDR_WIDTH = 32,
     parameter DATA_WIDTH = 32,
@@ -16,7 +16,7 @@ PC_ID_EX_omodule EX_datapath #(
     input wire reg_write_ID_EX_o,
     input wire [1:0] result_sel_ID_EX_o,
     input wire mem_write_ID_EX_o,
-    input wire uncond_jump_ID_EX_o,
+    input wire [1:0] uncond_jump_ID_EX_o,
     input wire meet_branch_ID_EX_o,
     input wire [3:0] alu_ctrl_ID_EX_o,
     input wire [1:0] alu_sel_rs1_ID_EX_o,
@@ -24,6 +24,7 @@ PC_ID_EX_omodule EX_datapath #(
     input wire pc_jal_sel_ID_EX_o,
     input wire [DATA_WIDTH-1:0] RD1D_ID_EX_o,
     input wire [DATA_WIDTH-1:0] RD2D_ID_EX_o,
+    input wire [2:0] funct3_ID_EX_o,
 
     // for forward rs1
     input wire [2:0] forward_detect_EX_rs1,
@@ -45,11 +46,16 @@ PC_ID_EX_omodule EX_datapath #(
     output reg PC_take_branch_EX,
     output reg PC_take_jalr_EX,
     output reg signed [INST_ADDR_WIDTH-1:0] PC_for_jalr_EX,
-    output reg signed [INST_ADDR_WIDTH-1:0] PC_for_normal_branch_EX
+    output reg signed [INST_ADDR_WIDTH-1:0] PC_for_normal_branch_EX,
+    output reg [2:0] funct3_EX
 );
 
 wire signed [DATA_WIDTH-1:0] alu_in_rs1;
 wire signed [DATA_WIDTH-1:0] alu_in_rs2;
+wire signed [DATA_WIDTH-1:0] forward_rs1;
+wire signed [DATA_WIDTH-1:0] forward_rs2;
+
+wire branch_decision;
 
 always @(*) begin
     INST_EX = INST_ID_EX_o;
@@ -59,19 +65,24 @@ always @(*) begin
     rs1_EX = rs1_ID_EX_o;
     rs2_EX = rs2_ID_EX_o;
     rd_EX = rd_ID_EX_o;
+    funct3_EX = funct3_ID_EX_o;
 end
 
 always @(*) begin
-    PC_for_jalr_EX = PC_ID_EX_o + alu_in_rs1 + imm_ID_EX_o;
-    PC_for_normal_branch = PC_ID_EX_o + imm_ID_EX_o;
+    PC_for_jalr_EX = PC_ID_EX_o + forward_rs1 + imm_ID_EX_o;
+    PC_for_normal_branch_EX = PC_ID_EX_o + imm_ID_EX_o;
+    PC_take_jalr_EX = (uncond_jump_ID_EX_o == 2);
     PC_take_branch_EX = 0;
-    if(uncond_jump_ID_EX_o) PC_take_branch_EX = 1;
-    else if(meet_branch_ID_EX_o)begin
-        
-    end
+    if(uncond_jump_ID_EX_o!=0 || branch_decision) PC_take_branch_EX = 1;
 end
 
-
+compare #(.DATA_WIDTH(DATA_WIDTH)) u_compare (
+    .funct3(funct3_EX),
+    .forward_rs1(forward_rs1),
+    .forward_rs2(forward_rs2),
+    .meet_branch_ID_EX_o(meet_branch_ID_EX_o),
+    .branch_decision(branch_decision)
+);
 
 alu #(.DATA_WIDTH(DATA_WIDTH)) u_alu (
     .alu_in_rs1(alu_in_rs1),
@@ -87,7 +98,8 @@ handle_rs1_for_alu #(.DATA_WIDTH(DATA_WIDTH)) u_handle_rs1_for_alu (
     .result_WB(result_WB),
     .alu_sel_rs1_ID_EX_o(alu_sel_rs1_ID_EX_o),
     .PC_ID_EX_o(PC_ID_EX_o),
-    .rs1_for_alu_res(alu_in_rs1)
+    .rs1_for_alu_res(alu_in_rs1),
+    .forward_rs1(forward_rs1)
 );
 
 handle_rs2_for_alu #(.DATA_WIDTH(DATA_WIDTH)) u_handle_rs2_for_alu (
@@ -98,7 +110,8 @@ handle_rs2_for_alu #(.DATA_WIDTH(DATA_WIDTH)) u_handle_rs2_for_alu (
     .alu_sel_rs2_ID_EX_o(alu_sel_rs2_ID_EX_o),
     .mux_for_rs2_EX_forward_res(write_data_EX),
     .imm_ID_EX_o(imm_ID_EX_o),
-    .rs2_for_alu_res(alu_in_rs2)
+    .rs2_for_alu_res(alu_in_rs2),
+    .forward_rs2(forward_rs2)
 );
 
 endmodule

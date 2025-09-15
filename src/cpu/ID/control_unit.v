@@ -8,7 +8,7 @@ module control_unit (
     output reg reg_write_ID,
     output reg [1:0] result_sel_ID,
     output reg mem_write_ID,
-    output reg uncond_jump_ID,
+    output reg [1:0] uncond_jump_ID,
     output reg meet_branch_ID,
     output reg [3:0] alu_ctrl_ID,
     output reg [1:0] alu_sel_rs1_ID,
@@ -27,9 +27,11 @@ always @(*) begin
 
 
     uncond_jump_ID = 0;
-    if(opcode==`JAL || opcode==`JALR)
+    if(opcode==`JAL)
         uncond_jump_ID = 1;
-
+    else if(opcode==`JALR)
+        uncond_jump_ID = 2;
+    
     pc_jal_sel_ID = 0;
     if(opcode==`JALR) pc_jal_sel_ID = 1;
 

@@ -20,18 +20,20 @@ module ID_datapath #(
     output wire reg_write_ID,
     output wire [1:0] result_sel_ID,
     output wire mem_write_ID,
-    output wire uncond_jump_ID,
+    output wire [1:0] uncond_jump_ID,
     output wire meet_branch_ID,
     output wire [3:0] alu_ctrl_ID,
     output wire [1:0] alu_sel_rs1_ID,
     output wire [1:0] alu_sel_rs2_ID,
-    output wire pc_jal_sel_ID
+    output wire pc_jal_sel_ID,
+    output reg [2:0] funct3_ID
 );
 
 always @(*) begin
     INST_ID = INST_IF_ID_o;
     PC_ID = PC_IF_ID_o;
     PC_plus_4_ID = PC_plus_4_IF_ID_o;
+    funct3_ID = INST_IF_ID_o[14:12];
 end
 
 wire [7-1:0] funct7;

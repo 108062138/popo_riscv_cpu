@@ -7,8 +7,11 @@ module handle_rs2_for_alu #(parameter DATA_WIDTH = 32)(
     input wire [1:0] alu_sel_rs2_ID_EX_o,
     output wire [DATA_WIDTH-1:0] mux_for_rs2_EX_forward_res,
     input wire [DATA_WIDTH-1:0] imm_ID_EX_o,
-    output wire [DATA_WIDTH-1:0] rs2_for_alu_res
+    output wire [DATA_WIDTH-1:0] rs2_for_alu_res,
+    output wire [DATA_WIDTH-1:0] forward_rs2
 );
+
+assign forward_rs2 = mux_for_rs2_EX_forward_res;
 
 mux_for_rs2_EX_forward #(.DATA_WIDTH(DATA_WIDTH)) u_mux_for_rs2_EX_forward (
     .forward_detect_EX_rs2(forward_detect_EX_rs2),

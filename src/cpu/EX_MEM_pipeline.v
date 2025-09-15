@@ -16,6 +16,7 @@ module EX_MEM_pipeline #(
     input wire [REGISTER_ADDR_WIDTH-1:0] rd_EX_MEM_i,
     input wire signed [DATA_WIDTH-1:0] write_data_EX_MEM_i,
     input wire [INST_ADDR_WIDTH-1:0] PC_plus_4_EX_MEM_i,
+    input wire [2:0] funct3_EX_MEM_i,
 
     output reg [INST_WIDTH-1:0] INST_EX_MEM_o,
     output reg reg_write_EX_MEM_o,
@@ -24,7 +25,8 @@ module EX_MEM_pipeline #(
     output reg signed [DATA_WIDTH-1:0] alu_res_EX_MEM_o,
     output reg [REGISTER_ADDR_WIDTH-1:0] rd_EX_MEM_o,
     output reg signed [DATA_WIDTH-1:0] write_data_EX_MEM_o,
-    output reg [INST_ADDR_WIDTH-1:0] PC_plus_4_EX_MEM_o
+    output reg [INST_ADDR_WIDTH-1:0] PC_plus_4_EX_MEM_o,
+    output reg [2:0] funct3_EX_MEM_o
 );
 
 always @(posedge cpu_clk) begin
@@ -37,6 +39,7 @@ always @(posedge cpu_clk) begin
         rd_EX_MEM_o <= 0;
         write_data_EX_MEM_o <= 0;
         PC_plus_4_EX_MEM_o <= 0;
+        funct3_EX_MEM_o <= 0;
     end else begin
         INST_EX_MEM_o <= INST_EX_MEM_i;
         reg_write_EX_MEM_o <= reg_write_EX_MEM_i;
@@ -46,6 +49,7 @@ always @(posedge cpu_clk) begin
         rd_EX_MEM_o <= rd_EX_MEM_i;
         write_data_EX_MEM_o <= write_data_EX_MEM_i;
         PC_plus_4_EX_MEM_o <= PC_plus_4_EX_MEM_i;
+        funct3_EX_MEM_o <= funct3_EX_MEM_i;
     end
 end
 
