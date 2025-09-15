@@ -37,6 +37,7 @@ always @(posedge cpu_clk) begin
         data_mem_rdata_MEM_WB_o <= 0;
         rd_MEM_WB_o <= 0;
         PC_plus_4_MEM_WB_o <= 0;
+        funct3_MEM_WB_o <= 0;
     end else begin
         INST_MEM_WB_o <= INST_MEM_WB_i;
         reg_write_MEM_WB_o <= reg_write_MEM_WB_i;
@@ -45,6 +46,7 @@ always @(posedge cpu_clk) begin
         data_mem_rdata_MEM_WB_o <= data_mem_rdata_MEM_WB_i;
         rd_MEM_WB_o <= rd_MEM_WB_i;
         PC_plus_4_MEM_WB_o <= PC_plus_4_MEM_WB_i;
+        funct3_MEM_WB_o <= funct3_MEM_WB_i;
     end
 end
 

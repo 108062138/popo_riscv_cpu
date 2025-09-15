@@ -14,7 +14,6 @@ initial cpu_clk = 0;
 always #(CPU_CYC/2) cpu_clk = ~cpu_clk;
 always #(SYS_CYC/2) sys_clk = ~sys_clk;
 initial begin
-    repeat(max_cyc) @(posedge cpu_clk);
     wait(u_chip.u_cpu.u_regfile.rf[31]==666);
     $finish;
 end

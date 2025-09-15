@@ -44,7 +44,15 @@ end
 always @(*) begin
     result_WB = alu_res_WB;
     if(result_sel_WB==`SEL_MEM_AS_RES)begin
-        result_WB = data_mem_rdata_WB;
+        // result_WB = data_mem_rdata_WB;
+        case(funct3_WB)
+            3'b000: result_WB = {{24{data_mem_rdata_WB[8-1]}}, data_mem_rdata_WB[8-1:0]}; // lb
+            3'b001: result_WB = {{16{data_mem_rdata_WB[16-1]}}, data_mem_rdata_WB[16-1:0]}; // lw
+            3'b010: result_WB = data_mem_rdata_WB; // lw
+            3'b100: result_WB = {24'b0, data_mem_rdata_WB[8-1:0]};// lbu
+            3'b101: result_WB = {16'b0, data_mem_rdata_WB[16-1:0]};// lhu
+            default: result_WB = data_mem_rdata_WB;
+        endcase
     end else if(result_sel_WB==`SEL_PC_PLUS_4_AS_RES)begin
         result_WB = PC_plus_4_WB;
     end
