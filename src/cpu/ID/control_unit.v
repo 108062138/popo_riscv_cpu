@@ -43,8 +43,12 @@ always @(*) begin
     if(opcode==`CAL_R)begin
         case(funct3)
             3'b000: begin
-                if(!funct7[5]) alu_ctrl_ID = 4'b0000; // add
-                else alu_ctrl_ID = 4'b0001; // sub
+                if(!funct7[0])begin
+                    if(!funct7[5]) alu_ctrl_ID = 4'b0000; // add
+                    else alu_ctrl_ID = 4'b0001; // sub
+                end else begin
+                    alu_ctrl_ID = 4'b1010; // mul
+                end
             end
             3'b001: alu_ctrl_ID = 4'b0010; // sll
             3'b010: alu_ctrl_ID = 4'b0011; // slt

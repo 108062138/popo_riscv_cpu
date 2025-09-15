@@ -29,3 +29,4 @@ loop_condition:
 loop_end:
     addi x4, x1, 0        # 00038413 addr 7 28
     add x4, x4, x4        # 00840433 addr 8 32
+    addi x31, x0, 5

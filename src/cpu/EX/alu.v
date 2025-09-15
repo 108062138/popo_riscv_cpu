@@ -8,7 +8,7 @@ module alu #( parameter DATA_WIDTH = 32)(
 // intermediate signed wires for rs1 and rs2
 wire signed [DATA_WIDTH-1:0] rs1_signed = $signed(alu_in_rs1);
 wire signed [DATA_WIDTH-1:0] rs2_signed = $signed(alu_in_rs2);
-
+wire signed [DATA_WIDTH*2-1:0] mul_content = alu_in_rs1 * alu_in_rs2;
 always @(*) begin
     case (alu_ctrl_ID_EX_o)
         4'b0000: alu_res = rs1_signed + rs2_signed; // signed add
@@ -21,6 +21,7 @@ always @(*) begin
         4'b0111: alu_res = rs1_signed >>> alu_in_rs2[4:0]; // sra (arithmetic shift right)
         4'b1000: alu_res = alu_in_rs1 | alu_in_rs2; // or
         4'b1001: alu_res = alu_in_rs1 & alu_in_rs2; // and
+        4'b1010: alu_res = mul_content[DATA_WIDTH-1:0]; // mul
         default: alu_res = 32'd0;
     endcase
 end

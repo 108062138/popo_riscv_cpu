@@ -4,7 +4,7 @@ module tb_chip();
 
 parameter CPU_CYC = 10;
 parameter SYS_CYC = 40;
-parameter max_cyc = 80;
+parameter max_cyc = 600;
 reg cpu_clk;
 reg sys_clk;
 reg cpu_rst_n;
@@ -15,7 +15,7 @@ always #(CPU_CYC/2) cpu_clk = ~cpu_clk;
 always #(SYS_CYC/2) sys_clk = ~sys_clk;
 initial begin
     repeat(max_cyc) @(posedge cpu_clk);
-    $display("(QQ my love)");
+    wait(u_chip.u_cpu.u_regfile.rf[31]==666);
     $finish;
 end
 initial begin
