@@ -4,7 +4,6 @@ module control_unit (
     input wire [7-1:0] funct7,
     input wire [3-1:0] funct3,
     input wire [6:0] opcode,
-    input wire [6:0] OP_type,
 
     output reg reg_write_ID,
     output reg [1:0] result_sel_ID,
@@ -19,7 +18,7 @@ module control_unit (
 
 always @(*) begin
     reg_write_ID = 1;
-    if(opcode==`BRANCH || opcode==`STORE|| OP_type==`X_type)
+    if(opcode==`BRANCH || opcode==`STORE)
         reg_write_ID = 0;
 
     mem_write_ID = 0;
@@ -50,12 +49,27 @@ always @(*) begin
             3'b011: alu_ctrl_ID = 4'b0100; // sltu
             3'b100: alu_ctrl_ID = 4'b0101; // xor
             3'b101: begin
-                if(funct7[5]) alu_ctrl_ID = 4'b0110; // srl
+                if(!funct7[5]) alu_ctrl_ID = 4'b0110; // srl
                 else alu_ctrl_ID = 4'b0111; // sra
             end
             3'b110: alu_ctrl_ID = 4'b1000; // or
             3'b111: alu_ctrl_ID = 4'b1001; // and
-            default: alu_ctrl_ID = 4'b0000; // default add for R-type
+            default: alu_ctrl_ID = 4'b0000; // default add for R
+        endcase
+    end else if(opcode==`CAL_I)begin
+        case(funct3)
+            3'b000: alu_ctrl_ID = 4'b0000; // addi
+            3'b001: alu_ctrl_ID = 4'b0010; // slli
+            3'b010: alu_ctrl_ID = 4'b0011; // slti
+            3'b011: alu_ctrl_ID = 4'b0100; // sltiu
+            3'b100: alu_ctrl_ID = 4'b0101; // xori
+            3'b101: begin
+                if(!funct7[5]) alu_ctrl_ID = 4'b0110; // srli
+                else alu_ctrl_ID = 4'b0111; // srai
+            end
+            3'b110: alu_ctrl_ID = 4'b1000; // ori
+            3'b111: alu_ctrl_ID = 4'b1001; // ani
+            default: alu_ctrl_ID = 4'b0000;
         endcase
     end
 

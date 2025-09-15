@@ -1,4 +1,4 @@
-module EX_datapath #(
+PC_ID_EX_omodule EX_datapath #(
     parameter INST_WIDTH = 32,
     parameter INST_ADDR_WIDTH = 32,
     parameter DATA_WIDTH = 32,
@@ -41,7 +41,11 @@ module EX_datapath #(
     output reg [REGISTER_ADDR_WIDTH-1:0] rs2_EX,
     output reg [REGISTER_ADDR_WIDTH-1:0] rd_EX,
     output wire signed [DATA_WIDTH-1:0] write_data_EX,
-    output reg [INST_ADDR_WIDTH-1:0] PC_plus_4_EX
+    output reg [INST_ADDR_WIDTH-1:0] PC_plus_4_EX,
+    output reg PC_take_branch_EX,
+    output reg PC_take_jalr_EX,
+    output reg signed [INST_ADDR_WIDTH-1:0] PC_for_jalr_EX,
+    output reg signed [INST_ADDR_WIDTH-1:0] PC_for_normal_branch_EX
 );
 
 wire signed [DATA_WIDTH-1:0] alu_in_rs1;
@@ -56,6 +60,18 @@ always @(*) begin
     rs2_EX = rs2_ID_EX_o;
     rd_EX = rd_ID_EX_o;
 end
+
+always @(*) begin
+    PC_for_jalr_EX = PC_ID_EX_o + alu_in_rs1 + imm_ID_EX_o;
+    PC_for_normal_branch = PC_ID_EX_o + imm_ID_EX_o;
+    PC_take_branch_EX = 0;
+    if(uncond_jump_ID_EX_o) PC_take_branch_EX = 1;
+    else if(meet_branch_ID_EX_o)begin
+        
+    end
+end
+
+
 
 alu #(.DATA_WIDTH(DATA_WIDTH)) u_alu (
     .alu_in_rs1(alu_in_rs1),

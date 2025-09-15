@@ -27,7 +27,10 @@ always@(posedge cpu_clk)begin
         else if(INIT_STYLE==1) for(i=0;i<2**REGISTER_ADDR_WIDTH;i=i+1) rf[i] <= i*3;
         else for(i=0;i<2**REGISTER_ADDR_WIDTH;i=i+1) rf[i] <= 0;
     end else begin
-        if(we && wd_addr!=0) rf[wd_addr] <= wd_data;
+        if(we && wd_addr!=0) begin
+            rf[wd_addr] <= wd_data;
+            $display("write reg[%d] <= %d", wd_addr, $signed(wd_data));
+        end
         rf[0] <= 0;
     end
 end

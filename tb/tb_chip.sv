@@ -42,9 +42,9 @@ event reset_done;
 task reset_all();
 fork
     begin
-        sys_rst_n = 1; cpu_rst_n = 1; repeat(2)@(negedge sys_clk);
+        sys_rst_n = 1; cpu_rst_n = 1; repeat(1)@(negedge sys_clk);
         sys_rst_n = 0; cpu_rst_n = 0; repeat(2)@(negedge sys_clk);
-        sys_rst_n = 1; cpu_rst_n = 1; repeat(4)@(negedge sys_clk);
+        sys_rst_n = 1; cpu_rst_n = 1; repeat(2)@(negedge sys_clk);
     end
 join
 -> reset_done;

@@ -37,7 +37,6 @@ end
 wire [7-1:0] funct7;
 wire [3-1:0] funct3;
 wire [6:0] opcode;
-wire [6:0] OP_type;
 
 decoder #(.INST_WIDTH(INST_WIDTH),.DATA_WIDTH(DATA_WIDTH)) u_decoder (
     .inst(INST_ID),
@@ -47,14 +46,12 @@ decoder #(.INST_WIDTH(INST_WIDTH),.DATA_WIDTH(DATA_WIDTH)) u_decoder (
     .rs1(rs1_ID),
     .rs2(rs2_ID),
     .rd(rd_ID),
-    .imm(imm_ID),
-    .OP_type(OP_type)
+    .imm(imm_ID)
 );
 control_unit u_control_unit (
     .funct7(funct7),
     .funct3(funct3),
     .opcode(opcode),
-    .OP_type(OP_type),
     .reg_write_ID(reg_write_ID),
     .result_sel_ID(result_sel_ID),
     .mem_write_ID(mem_write_ID),

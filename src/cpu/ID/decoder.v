@@ -12,29 +12,28 @@ module decoder #(
     output reg [5-1:0] rs1,
     output reg [5-1:0] rs2,
     output reg [5-1:0] rd,
-    output reg signed [DATA_WIDTH-1:0] imm,
-    output reg [7-1:0] OP_type
+    output reg signed [DATA_WIDTH-1:0] imm
 );
 
 always @(*) begin
-    funct7 = inst[31:25];
-    rs2 = inst[24:20];
-    rs1 = inst[19:15];
-    funct3 = inst[14:12];
-    rd = inst[11:7];
     opcode = inst[6:0];
-    case (opcode)
-        `CAL_R:   OP_type = `R_type;
-        `JALR:    OP_type = `I_type;
-        `LOAD:    OP_type = `I_type;
-        `CAL_I:   OP_type = `I_type;
-        `STORE:   OP_type = `S_type;
-        `BRANCH:  OP_type = `B_type;
-        `LUI:     OP_type = `U_type;
-        `AUIPC:   OP_type = `U_type;
-        `JAL:     OP_type = `J_type;
-        default: OP_type = `X_type;
-    endcase
+
+    funct3 = inst[14:12];
+    
+    funct7 = 0;
+    if(opcode==`CAL_R || (opcode==`CAL_I && (funct3==3'b001 || funct3==3'b101)))begin
+        funct7 = inst[31:25];
+    end
+
+    rs1 = inst[19:15];
+
+    rs2 = 0;
+    if(opcode==`BRANCH || opcode==`STORE || opcode==`CAL_R)begin
+        rs2 = inst[24:20];
+    end
+    
+    rd = inst[11:7];
+    if(opcode==`BRANCH || opcode==`STORE) rd = 0;
 end
 
 imm_unit #(.DATA_WIDTH(DATA_WIDTH)) u_imm_unit (.inst(inst), .opcode(opcode), .funct3(funct3), .imm(imm));

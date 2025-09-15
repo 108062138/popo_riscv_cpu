@@ -1,3 +1,5 @@
+`include "riscv_defs.vh"
+
 module WB_datapath #(
     parameter INST_WIDTH = 32,
     parameter INST_ADDR_WIDTH = 32,
@@ -38,9 +40,9 @@ end
 
 always @(*) begin
     result_WB = alu_res_WB;
-    if(result_sel_WB==1)begin
+    if(result_sel_WB==`SEL_MEM_AS_RES)begin
         result_WB = data_mem_rdata_WB;
-    end else if(result_sel_WB==2)begin
+    end else if(result_sel_WB==`SEL_PC_PLUS_4_AS_RES)begin
         result_WB = PC_plus_4_WB;
     end
 end

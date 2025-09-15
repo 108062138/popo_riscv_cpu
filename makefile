@@ -13,14 +13,19 @@ BUILD     		  	:= obj_dir
 SIM_CHIP  		  	:= $(BUILD)/Vtb_chip
 SIM_AXI           	:= $(BUILD)/Vtb_axi
 SIM_ASYNCFIFO     	:= $(BUILD)/Vtb_asyncfifo
+SIM_ALU          	:= $(BUILD)/Vtb_alu
 
-.PHONY: all run sim_chip clean sim_axi sim_asyncfifo
+.PHONY: all run sim_chip clean sim_axi sim_asyncfifo sim_alu
 
 all: run
 
 $(SIM_CHIP): tb/tb_chip.sv $(CHIP_SRCS) $(L1_CACHE_SRCS) $(CPU_SRCS) | $(BUILD)
 	@echo "[VERILATOR] Compile -> $@"
 	verilator --trace-vcd --binary -j 32 --top-module tb_chip -Isrc/cpu tb/tb_chip.sv $(CHIP_SRCS) $(L1_CACHE_SRCS) $(CPU_SRCS)
+
+$(SIM_ALU): src/cpu/EX/tb_alu.v src/cpu/EX/alu.v | $(BUILD)
+	@echo "[VERILATOR] Compile -> $@"
+	verilator --trace-vcd --binary -j 32 --top-module tb_alu -Isrc/cpu src/cpu/EX/tb_alu.v src/cpu/EX/alu.v
 
 $(SIM_AXI): tb/tb_axi.sv $(AXI_SRCS) $(ASYNCFIFO_SRCS) $(BUS_INTEGRATE_SRCS) $(MEMORY_SRCS)| $(BUILD)
 	@echo "[VERILATOR] Compile -> $@"
@@ -29,6 +34,8 @@ $(SIM_AXI): tb/tb_axi.sv $(AXI_SRCS) $(ASYNCFIFO_SRCS) $(BUS_INTEGRATE_SRCS) $(M
 $(SIM_ASYNCFIFO): tb/tb_asyncfifo.sv $(ASYNCFIFO_SRCS) | $(BUILD)
 	@echo "[VERILATOR] Compile -> $@"
 	verilator --trace-vcd --binary -j 32 -Wno-EOFNEWLINE -Wno-WIDTHEXPAND --top-module tb_asyncfifo tb/tb_asyncfifo.sv $(ASYNCFIFO_SRCS)
+
+
 
 $(BUILD):
 	@mkdir -p $(BUILD)
@@ -43,6 +50,10 @@ sim_axi: $(SIM_AXI)
 sim_asyncfifo: $(SIM_ASYNCFIFO)
 	@echo "[VVP] Run -> ./$(SIM_ASYNCFIFO)"
 	./$(SIM_ASYNCFIFO)
+
+sim_alu: $(SIM_ALU)
+	@echo "[VVP] Run -> ./$(SIM_ALU)"
+	./$(SIM_ALU)
 
 run: sim_chip
 

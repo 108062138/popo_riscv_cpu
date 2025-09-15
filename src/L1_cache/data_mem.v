@@ -25,18 +25,18 @@ initial begin
     $readmemh("/home/popo/Desktop/popo_train_cpu/popo_cpu/tb/data.mem", mem);
 end
 always @(*) begin
-    data_mem_hazard = #5 0;
+    data_mem_hazard = #1 0;
     if(data_mem_read_ctrl_by==cpu_ctrl)
-        data_mem_rdata = #5 mem[cpu_data_mem_raddr];
+        data_mem_rdata = #1 mem[cpu_data_mem_raddr];
     else
-        data_mem_rdata = #5 mem[dma_data_mem_raddr];
+        data_mem_rdata = #1 mem[dma_data_mem_raddr];
 end
 always @(posedge cpu_clk) begin
     if(data_mem_write)begin
         if(data_mem_write_ctrl_by==cpu_ctrl)
-            mem[cpu_data_mem_waddr] <= #5 cpu_data_mem_wdata;
+            mem[cpu_data_mem_waddr] <= #1 cpu_data_mem_wdata;
         else
-            mem[dma_data_mem_waddr] <= #5 dma_data_mem_wdata;
+            mem[dma_data_mem_waddr] <= #1 dma_data_mem_wdata;
     end
 end
 

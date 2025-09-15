@@ -334,7 +334,18 @@ WB_datapath #( .INST_WIDTH(INST_WIDTH), .INST_ADDR_WIDTH(INST_ADDR_WIDTH), .DATA
 wire stall_PC_IF,stall_IF_ID;
 wire flush_IF_ID, flush_ID_EX;
 
-hazard_detection u_hazard_detction ( .inst_mem_hazard(inst_mem_hazard), .data_mem_hazard(data_mem_hazard), .stall_PC_IF(stall_PC_IF), .stall_IF_ID(stall_IF_ID), .flush_IF_ID(flush_IF_ID), .flush_ID_EX(flush_ID_EX));
+hazard_detection #(.REGISTER_ADDR_WIDTH(REGISTER_ADDR_WIDTH)) u_hazard_detction (
+    .inst_mem_hazard(inst_mem_hazard),
+    .data_mem_hazard(data_mem_hazard),
+    .rs1_ID(rs1_ID),
+    .rs2_ID(rs2_ID),
+    .rd_EX(rd_EX),
+    .result_sel_EX(result_sel_EX),
+    .stall_PC_IF(stall_PC_IF),
+    .stall_IF_ID(stall_IF_ID),
+    .flush_IF_ID(flush_IF_ID),
+    .flush_ID_EX(flush_ID_EX)
+);
 
 wire [2:0] forward_detect_rs1;
 wire [2:0] forward_detect_rs2;
