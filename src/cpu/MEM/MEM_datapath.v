@@ -23,6 +23,7 @@ module MEM_datapath #(
     output reg signed [DATA_WIDTH-1:0] alu_res_MEM,
     output reg [REGISTER_ADDR_WIDTH-1:0] rd_MEM,
     output reg [DATA_WIDTH-1:0] write_data_MEM,
+    output reg [3:0] write_data_strobe_MEM,
     output reg [INST_ADDR_WIDTH-1:0] PC_plus_4_MEM,
     output reg [2:0] funct3_MEM
 );
@@ -36,5 +37,10 @@ always @(*) begin
     write_data_MEM = write_data_EX_MEM_o;
     PC_plus_4_MEM = PC_plus_4_EX_MEM_o;
     funct3_MEM = funct3_EX_MEM_o;
+    case(funct3_MEM)
+        3'b000: write_data_strobe_MEM = 4'b0001;
+        3'b001: write_data_strobe_MEM = 4'b0011;
+        default: write_data_strobe_MEM = 4'b1111;
+    endcase
 end
 endmodule

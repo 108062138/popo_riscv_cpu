@@ -32,7 +32,7 @@ always @(*) begin
     end
 
     if(result_sel_EX==`SEL_MEM_AS_RES)begin
-        if(rd_EX!=0)begin
+        if(rd_EX!=0 && (rd_EX==rs1_ID || rd_EX==rs2_ID))begin
             stall_PC_IF = 1;
             stall_IF_ID = 1;
             flush_ID_EX = 1;

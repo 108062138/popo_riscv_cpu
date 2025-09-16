@@ -17,7 +17,7 @@ module inst_mem #(
 
 reg [INST_WIDTH-1:0] mem [0:NUM_WORDS-1];
 initial begin
-    $readmemh("/home/popo/Desktop/popo_train_cpu/popo_cpu/tb/inst.mem", mem);
+    $readmemh("/home/popo/Desktop/popo_train_cpu/popo_cpu/tb/word_inst.mem", mem);
 end
 always @(*) begin
     inst_mem_hazard = #2 0;

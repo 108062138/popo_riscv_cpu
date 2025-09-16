@@ -22,7 +22,8 @@ module L1_cache #(
     
     input wire [DATA_ADDR_WIDTH-1:0] cpu_data_mem_waddr,
     input wire [DATA_WIDTH-1:0] cpu_data_mem_wdata,
-    input wire cpu_data_mem_write
+    input wire cpu_data_mem_write,
+    input wire [3:0] cpu_data_mem_write_strobe
     // use axi interface 
     // lots of write to connect
     // TODO
@@ -70,6 +71,7 @@ data_mem #(
     .dma_data_mem_waddr(32'b0),
     .dma_data_mem_wdata(32'b0),
     .data_mem_write(cpu_data_mem_write),
+    .cpu_data_mem_write_strobe(cpu_data_mem_write_strobe),
     .data_mem_write_ctrl_by(1'b0)
 );
 

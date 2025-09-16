@@ -24,6 +24,7 @@ wire data_mem_hazard;
 wire [DATA_ADDR_WIDTH-1:0] cpu_data_mem_waddr;
 wire [DATA_WIDTH-1:0] cpu_data_mem_wdata;
 wire cpu_data_mem_write;
+wire [3:0] cpu_data_mem_write_strobe;
 
 L1_cache #(.INST_WIDTH(INST_WIDTH),.INST_ADDR_WIDTH(INST_ADDR_WIDTH),.DATA_WIDTH(DATA_WIDTH),.DATA_ADDR_WIDTH(DATA_ADDR_WIDTH),.NUM_WORDS_INST_MEM(NUM_WORDS_INST_MEM),.NUM_WORDS_DATA_MEM(NUM_WORDS_DATA_MEM),.READ_BURST_LEN(READ_BURST_LEN),.WRITE_BURST_LEN(WRITE_BURST_LEN)) u_L1_cache (
     .cpu_clk(cpu_clk),
@@ -37,7 +38,8 @@ L1_cache #(.INST_WIDTH(INST_WIDTH),.INST_ADDR_WIDTH(INST_ADDR_WIDTH),.DATA_WIDTH
     .data_mem_hazard(data_mem_hazard),
     .cpu_data_mem_waddr(cpu_data_mem_waddr),
     .cpu_data_mem_wdata(cpu_data_mem_wdata),
-    .cpu_data_mem_write(cpu_data_mem_write)
+    .cpu_data_mem_write(cpu_data_mem_write),
+    .cpu_data_mem_write_strobe(cpu_data_mem_write_strobe)
 );
 
 cpu #(
@@ -56,7 +58,8 @@ cpu #(
     .data_mem_hazard(data_mem_hazard),
     .cpu_data_mem_waddr(cpu_data_mem_waddr),
     .cpu_data_mem_wdata(cpu_data_mem_wdata),
-    .cpu_data_mem_write(cpu_data_mem_write)
+    .cpu_data_mem_write(cpu_data_mem_write),
+    .cpu_data_mem_write_strobe(cpu_data_mem_write_strobe)
 );
 
 endmodule

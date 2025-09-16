@@ -17,7 +17,8 @@ module cpu #(
     input wire data_mem_hazard,
     output wire [DATA_ADDR_WIDTH-1:0] cpu_data_mem_waddr,
     output wire [DATA_WIDTH-1:0] cpu_data_mem_wdata,
-    output wire cpu_data_mem_write
+    output wire cpu_data_mem_write,
+    output wire [3:0] cpu_data_mem_write_strobe
 );
 
 wire PC_take_branch_EX;
@@ -278,6 +279,7 @@ wire [REGISTER_ADDR_WIDTH-1:0] rd_MEM;
 wire [DATA_WIDTH-1:0] write_data_MEM;
 wire [INST_ADDR_WIDTH-1:0] PC_plus_4_MEM;
 wire [2:0] funct3_MEM;
+wire [3:0] write_data_strobe_MEM;
 
 MEM_datapath #( .INST_WIDTH(INST_WIDTH), .INST_ADDR_WIDTH(INST_ADDR_WIDTH), .DATA_WIDTH(DATA_WIDTH), .DATA_ADDR_WIDTH(DATA_ADDR_WIDTH), .REGISTER_WIDTH(REGISTER_WIDTH), .REGISTER_ADDR_WIDTH(REGISTER_ADDR_WIDTH)) u_MEM_datapath (
     .INST_EX_MEM_o(INST_EX_MEM_o),
@@ -296,6 +298,7 @@ MEM_datapath #( .INST_WIDTH(INST_WIDTH), .INST_ADDR_WIDTH(INST_ADDR_WIDTH), .DAT
     .alu_res_MEM(alu_res_MEM),
     .rd_MEM(rd_MEM),
     .write_data_MEM(write_data_MEM),
+    .write_data_strobe_MEM(write_data_strobe_MEM),
     .PC_plus_4_MEM(PC_plus_4_MEM),
     .funct3_MEM(funct3_MEM)
 );
@@ -304,6 +307,7 @@ assign cpu_data_mem_raddr = alu_res_MEM;
 assign cpu_data_mem_waddr = alu_res_MEM;
 assign cpu_data_mem_wdata = write_data_MEM;
 assign cpu_data_mem_write = mem_write_MEM;
+assign cpu_data_mem_write_strobe = write_data_strobe_MEM;
 
 wire [INST_WIDTH-1:0] INST_MEM_WB_o;
 wire reg_write_MEM_WB_o;

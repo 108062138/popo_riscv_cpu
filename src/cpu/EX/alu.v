@@ -22,6 +22,7 @@ always @(*) begin
         4'b1000: alu_res = alu_in_rs1 | alu_in_rs2; // or
         4'b1001: alu_res = alu_in_rs1 & alu_in_rs2; // and
         4'b1010: alu_res = mul_content[DATA_WIDTH-1:0]; // mul
+        4'b1011: alu_res = alu_in_rs1 / alu_in_rs2; // mod
         default: alu_res = 32'd0;
     endcase
 end

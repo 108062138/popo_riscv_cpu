@@ -22,6 +22,7 @@ inner_for_loop:
     beq x5, x2, increment_i
     mul x6, x4, x5
     add x3, x3, x6
+increment_j:
     addi x5, x5, 1
     j inner_for_loop
 increment_i:

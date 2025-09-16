@@ -29,7 +29,7 @@ always@(posedge cpu_clk)begin
     end else begin
         if(we && wd_addr!=0) begin
             rf[wd_addr] <= wd_data;
-            $display("write reg[%d] <= %d", wd_addr, $signed(wd_data));
+            // $display("write reg[%d] <= %d in hexa:%h", wd_addr, $signed(wd_data), wd_data);
         end
         rf[0] <= 0;
     end

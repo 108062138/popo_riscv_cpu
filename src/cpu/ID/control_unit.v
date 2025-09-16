@@ -53,7 +53,10 @@ always @(*) begin
             3'b001: alu_ctrl_ID = 4'b0010; // sll
             3'b010: alu_ctrl_ID = 4'b0011; // slt
             3'b011: alu_ctrl_ID = 4'b0100; // sltu
-            3'b100: alu_ctrl_ID = 4'b0101; // xor
+            3'b100: begin
+                if(!funct7[0]) alu_ctrl_ID = 4'b0101; // xor
+                else alu_ctrl_ID = 4'b1011; // div
+            end
             3'b101: begin
                 if(!funct7[5]) alu_ctrl_ID = 4'b0110; // srl
                 else alu_ctrl_ID = 4'b0111; // sra

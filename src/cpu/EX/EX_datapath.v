@@ -66,10 +66,11 @@ always @(*) begin
     rs2_EX = rs2_ID_EX_o;
     rd_EX = rd_ID_EX_o;
     funct3_EX = funct3_ID_EX_o;
+    PC_plus_4_EX = PC_plus_4_ID_EX_o;
 end
 
 always @(*) begin
-    PC_for_jalr_EX = PC_ID_EX_o + forward_rs1 + imm_ID_EX_o;
+    PC_for_jalr_EX = forward_rs1 + imm_ID_EX_o;
     PC_for_normal_branch_EX = PC_ID_EX_o + imm_ID_EX_o;
     PC_take_jalr_EX = (uncond_jump_ID_EX_o == 2);
     PC_take_branch_EX = 0;
