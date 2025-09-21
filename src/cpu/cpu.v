@@ -383,6 +383,8 @@ wire [2:0] forward_detect_rs1;
 wire [2:0] forward_detect_rs2;
 
 forward_detection #(.REGISTER_ADDR_WIDTH(REGISTER_ADDR_WIDTH)) u_forward_detection (
+    .reg_write_MEM(reg_write_MEM),
+    .reg_write_WB(reg_write_WB),
     .rs1_ID(rs1_ID),
     .rs2_ID(rs2_ID),
     .rs1_EX(rs1_EX),

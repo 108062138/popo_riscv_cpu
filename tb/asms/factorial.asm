@@ -2,12 +2,12 @@ main:
     addi sp, x0, 120     # 07800113
     addi sp, sp, -4      # ffc10113
     sw x1, 0(sp)         # 00112023
-    addi a0, x0, 5       # 00500513
+    addi a0, x0, 8       # 00500513
     jal factorial, x1    # 014000ef, offset = 20
     lw x1, 0(sp)         # 00012083
     addi sp, sp, 4       # 00410113
     addi x31, x0, 666    # 29a00f93
-    jalr x0, 0(x1)       # 000000e7
+    jalr x0, 0(x1)       # 00008067
 factorial:
     addi sp, sp, -8      # ff810113
     sw x1, 0(sp)         # 00112023
@@ -21,9 +21,9 @@ normal_case:
     mul a0, t0, a0       # 02a28533
     lw x1, 0(sp)         # 00012083
     addi sp, sp, 8       # 00810113
-    jalr x0, 0(x1)       # 000000e7
+    jalr x0, 0(x1)       # 00008067
 case_one:
     addi a0, x0, 1       # 00100513
     lw x1, 0(sp)         # 00012083
     addi sp, sp, 8       # 00810113
-    jalr x0, 0(x1)       # 000000e7
+    jalr x0, 0(x1)       # 00008067

@@ -18,3 +18,4 @@ srl x9, x1, x2 # x9 = FFFF_FFFF
 sra x10, x1, x2 # x10 = 07FFF_FFFF
 or x11, x1, x2 # x11 = FFFF_FFF5
 and x12, x1, x2 # x11 = 5
+addi x31, x0, 666
