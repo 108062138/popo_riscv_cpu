@@ -32,12 +32,19 @@ For now, these three module has not ....
 ## how to run
 
 - step0: clone main repo and enter the main working directory
+    
     $ git clone https://github.com/108062138/popo_cpu.git
+    
     $ cd popo_cpu
+
 - step1: clone asm to hexa repo and make the python env aware of the python extension
+    
     $ git clone https://https://github.com/108062138/riscv-assembler.git
+    
     $ pip install -e ./riscv-assembler
+
 - step3: change file path when possible
 
+If issues arise try:
 
-## 
+    $ python3 -m pip install riscv-assembler
