@@ -31,20 +31,26 @@ For now, these three module has not been connected yet. And they are not finishe
 
 - AXI bus: finish burst mode but interconnect module is not done yet. The currect setup is to 1-1 mapping, which is not realistic
 - L1 cache: the memory calling DMA should be re-implemented. And the memory maintains should add TLB and so on
-- five stage CPU: the CPU's branch is fixed, should use 4-state branch detection unit to replace it. the CPU's current jal, jalr is detected in EX stage, which always causes flush. I want it to move to ID stage, eliminating the need to flush ID/EX
+- five stage CPU: the CPU's branch is fixed, should use 4-state branch detection unit to replace it. the CPU's current jal, jalr is detected in EX stage, which always causes flush. I want it to move to ID stage, eliminating the need to flush ID/EX and add branch prediction module.
 
 ## how to run
 
-step0: clone main repo and enter the main working directory
+step 0: clone main repo and enter the main working directory
     
     $ git clone https://github.com/108062138/popo_cpu.git
     
     $ cd popo_cpu
 
-step1: clone asm to hexa repo and make the python env aware of the python extension
+step 1: clone asm to hexa repo and make the python env aware of the python extension
     
     $ git clone https://https://github.com/108062138/riscv-assembler.git
     
     $ pip install -e ./riscv-assembler
 
-step3: change file path when possible in src/L1_cache/inst_mem
+step 2: change file path when possible in src/L1_cache/inst_mem accordingly
+
+step 3: use makefile to run. for now, I provide two version of cpu to use: naive and opt, which can be specified by `CPU_VERSION`
+
+    $ make sim_chip CPU_VERSION=basic
+
+    $ make sim_chip CPU_VERSION=opt

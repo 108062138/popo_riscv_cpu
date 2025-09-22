@@ -1,14 +1,34 @@
-export CORE_ROOT=$(shell pwd)
 # ==== Config ====
-CHIP_TB_FILE   	  	:= tb/tb_chip.sv
-AXI_TB_FILE    	  	:= tb/tb_axi.sv
 CHIP_SRCS           := src/chip.v
 AXI_SRCS  		  	:= $(wildcard src/axi/*.v)
 L1_CACHE_SRCS  		:= $(wildcard src/L1_cache/*.v)
-CPU_SRCS            := $(wildcard src/cpu/*.v src/cpu/IF/*.v src/cpu/PC/*.v src/cpu/ID/*.v src/cpu/EX/*.v src/cpu/MEM/*.v src/cpu/WB/*.v)
 ASYNCFIFO_SRCS    	:= $(wildcard src/asyncfifo/*.v)
 BUS_INTEGRATE_SRCS	:= $(wildcard src/bus_integrate/*.v)
 MEMORY_SRCS			:= $(wildcard src/memory/*.v)
+CPU_VERSION         := basic
+CPU_SRCS_OPT        := $(wildcard src/cpu/*.v \
+                                  src/cpu/IF/*.v \
+                                  src/cpu/PC/*.v \
+                                  src/cpu/ID/*.v \
+                                  src/cpu/EX/*.v \
+                                  src/cpu/MEM/*.v \
+                                  src/cpu/WB/*.v)
+CPU_SRCS_BASIC      := $(wildcard src/naive_five_stage_cpu/*.v \
+                                  src/naive_five_stage_cpu/IF/*.v \
+                                  src/naive_five_stage_cpu/PC/*.v \
+                                  src/naive_five_stage_cpu/ID/*.v \
+                                  src/naive_five_stage_cpu/EX/*.v \
+                                  src/naive_five_stage_cpu/MEM/*.v \
+                                  src/naive_five_stage_cpu/WB/*.v)
+
+ifeq ($(CPU_VERSION), basic)
+	CPU_SRCS := $(CPU_SRCS_BASIC)
+else ifeq ($(CPU_VERSION), opt)
+	CPU_SRCS := $(CPU_SRCS_OPT)
+else
+    $(error Unknown CPU_VERSION '$(CPU_VERSION)', must be 'basic' or 'opt')
+endif
+# ==== Build ====
 BUILD     		  	:= obj_dir
 SIM_CHIP  		  	:= $(BUILD)/Vtb_chip
 SIM_AXI           	:= $(BUILD)/Vtb_axi

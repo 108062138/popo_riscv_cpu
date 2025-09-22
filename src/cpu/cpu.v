@@ -409,4 +409,8 @@ regfile #(.INIT_STYLE(1), .REGISTER_WIDTH(REGISTER_WIDTH), .REGISTER_ADDR_WIDTH(
     .wd_data(result_WB)
 );
 
+initial begin
+    $display("using opt cpu");
+end
+
 endmodule
