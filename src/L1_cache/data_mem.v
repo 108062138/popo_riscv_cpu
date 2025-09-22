@@ -25,6 +25,7 @@ localparam dma_ctrl = 1;
 reg [DATA_WIDTH-1:0] mem [0:NUM_WORDS-1];
 
 initial begin
+    $display("hahah");
     $readmemh("/home/popo/Desktop/popo_train_cpu/popo_cpu/tb/word_data.mem", mem);
 end
 
@@ -63,20 +64,64 @@ always @(*) begin
         write_base_word_number = cpu_data_mem_waddr >> 2;
         case (write_offset)
             0:begin
-                concat_cpu_data_mem_wdata_0 = cpu_data_mem_wdata;
-                concat_cpu_data_mem_wdata_1 = mem[write_base_word_number+1];
+                if(cpu_data_mem_write_strobe==4'b1111)begin
+                    concat_cpu_data_mem_wdata_0 = cpu_data_mem_wdata;
+                    concat_cpu_data_mem_wdata_1 = mem[write_base_word_number+1];
+                end else if(cpu_data_mem_write_strobe==4'b0011)begin
+                    concat_cpu_data_mem_wdata_0 = {mem[write_base_word_number][32-1:16], cpu_data_mem_wdata[16-1:0]};
+                    concat_cpu_data_mem_wdata_1 = mem[write_base_word_number+1];
+                end else if(cpu_data_mem_write_strobe==4'b0001)begin
+                    concat_cpu_data_mem_wdata_0 = {mem[write_base_word_number][32-1:8], cpu_data_mem_wdata[8-1:0]};
+                    concat_cpu_data_mem_wdata_1 = mem[write_base_word_number+1];
+                end else begin
+                    concat_cpu_data_mem_wdata_0 = 32'h09107519;
+                    concat_cpu_data_mem_wdata_1 = 32'h12345678;
+                end
             end 
             1:begin
-                concat_cpu_data_mem_wdata_0 = {cpu_data_mem_wdata[24-1:0], mem[write_base_word_number][8-1:0]};
-                concat_cpu_data_mem_wdata_1 = {mem[write_base_word_number+1][32-1:8], cpu_data_mem_wdata[32-1:24]};
+                if(cpu_data_mem_write_strobe==4'b1111)begin
+                    concat_cpu_data_mem_wdata_0 = {cpu_data_mem_wdata[24-1:0], mem[write_base_word_number][8-1:0]};
+                    concat_cpu_data_mem_wdata_1 = {mem[write_base_word_number+1][32-1:8], cpu_data_mem_wdata[32-1:24]};
+                end else if(cpu_data_mem_write_strobe==4'b0011)begin
+                    concat_cpu_data_mem_wdata_0 = {mem[write_base_word_number][32-1:24], cpu_data_mem_wdata[16-1:0], mem[write_base_word_number][8-1:0]};
+                    concat_cpu_data_mem_wdata_1 = mem[write_base_word_number+1];
+                end else if(cpu_data_mem_write_strobe==4'b0001) begin
+                    concat_cpu_data_mem_wdata_0 = {mem[write_base_word_number][32-1:16], cpu_data_mem_wdata[8-1:0], mem[write_base_word_number][8-1:0]};
+                    concat_cpu_data_mem_wdata_1 = mem[write_base_word_number+1];
+                end begin
+                    concat_cpu_data_mem_wdata_0 = 32'h09107519;
+                    concat_cpu_data_mem_wdata_1 = 32'h12345678;
+                end
             end
             2:begin
-                concat_cpu_data_mem_wdata_0 = {cpu_data_mem_wdata[16-1:0], mem[write_base_word_number][16-1:0]};
-                concat_cpu_data_mem_wdata_1 = {mem[write_base_word_number+1][32-1:16], cpu_data_mem_wdata[32-1:16]};
+                if(cpu_data_mem_write_strobe == 4'b1111)begin
+                    concat_cpu_data_mem_wdata_0 = {cpu_data_mem_wdata[16-1:0], mem[write_base_word_number][16-1:0]};
+                    concat_cpu_data_mem_wdata_1 = {mem[write_base_word_number+1][32-1:16], cpu_data_mem_wdata[32-1:16]};
+                end else if(cpu_data_mem_write_strobe == 4'b0011)begin
+                    concat_cpu_data_mem_wdata_0 = {cpu_data_mem_wdata[16-1:0], mem[write_base_word_number][16-1:0]};
+                    concat_cpu_data_mem_wdata_1 = mem[write_base_word_number+1];
+                end else if(cpu_data_mem_write_strobe == 4'b0001) begin
+                    concat_cpu_data_mem_wdata_0 = {mem[write_base_word_number][32-1:24], cpu_data_mem_wdata[8-1:0], mem[write_base_word_number][16-1:0]};
+                    concat_cpu_data_mem_wdata_1 = mem[write_base_word_number+1];
+                end else begin
+                    concat_cpu_data_mem_wdata_0 = 32'h09107519;
+                    concat_cpu_data_mem_wdata_1 = 32'h12345678;
+                end
             end
             3:begin
-                concat_cpu_data_mem_wdata_0 = {cpu_data_mem_wdata[8-1:0], mem[write_base_word_number][24-1:0]};
-                concat_cpu_data_mem_wdata_1 = {mem[write_base_word_number+1][32-1:24], cpu_data_mem_wdata[32-1:8]};
+                if(cpu_data_mem_write_strobe == 4'b1111)begin
+                    concat_cpu_data_mem_wdata_0 = {cpu_data_mem_wdata[8-1:0], mem[write_base_word_number][24-1:0]};
+                    concat_cpu_data_mem_wdata_1 = {mem[write_base_word_number+1][32-1:24], cpu_data_mem_wdata[32-1:8]};
+                end else if(cpu_data_mem_write_strobe==4'b0011)begin
+                    concat_cpu_data_mem_wdata_0 = {cpu_data_mem_wdata[8-1:0], mem[write_base_word_number][24-1:0]};
+                    concat_cpu_data_mem_wdata_1 = {mem[write_base_word_number+1][32-1:8], cpu_data_mem_wdata[16-1:8]};
+                end else if(cpu_data_mem_write_strobe==4'b0001) begin
+                    concat_cpu_data_mem_wdata_0 = {cpu_data_mem_wdata[8-1:0], mem[write_base_word_number][24-1:0]};
+                    concat_cpu_data_mem_wdata_1 = mem[write_base_word_number+1];
+                end begin
+                    concat_cpu_data_mem_wdata_0 = 32'h09107519;
+                    concat_cpu_data_mem_wdata_1 = 32'h12345678;
+                end 
             end
             default: begin
                 concat_cpu_data_mem_wdata_0 = cpu_data_mem_wdata;
@@ -98,6 +143,7 @@ always @(posedge cpu_clk) begin
         if(data_mem_write_ctrl_by==cpu_ctrl)begin
             mem[write_base_word_number] <= #1 concat_cpu_data_mem_wdata_0;
             mem[write_base_word_number+1] <= #1 concat_cpu_data_mem_wdata_1;
+            $display("see strobe: %b", cpu_data_mem_write_strobe);
         end else begin
             mem[dma_data_mem_waddr] <= #1 dma_data_mem_wdata;
         end

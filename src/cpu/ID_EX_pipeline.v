@@ -30,6 +30,7 @@ module ID_EX_pipeline #(
     input wire [DATA_WIDTH-1:0] RD1D_ID_EX_i,
     input wire [DATA_WIDTH-1:0] RD2D_ID_EX_i,
     input wire [2:0] funct3_ID_EX_i,
+    input wire [6:0] opcode_ID_EX_i,
 
     output reg [INST_ADDR_WIDTH-1:0] PC_ID_EX_o,
     output reg [INST_ADDR_WIDTH-1:0] PC_plus_4_ID_EX_o,
@@ -49,7 +50,8 @@ module ID_EX_pipeline #(
     output reg pc_jal_sel_ID_EX_o,
     output reg [DATA_WIDTH-1:0] RD1D_ID_EX_o,
     output reg [DATA_WIDTH-1:0] RD2D_ID_EX_o,
-    output reg [2:0] funct3_ID_EX_o
+    output reg [2:0] funct3_ID_EX_o,
+    output reg [6:0] opcode_ID_EX_o
 );
 
 always @(posedge cpu_clk) begin
@@ -73,6 +75,7 @@ always @(posedge cpu_clk) begin
         RD1D_ID_EX_o <= 0;
         RD2D_ID_EX_o <= 0;
         funct3_ID_EX_o <= 0;
+        opcode_ID_EX_o <= 0;
     end else begin
         if(flush_ID_EX)begin
             PC_ID_EX_o <= 0;
@@ -94,6 +97,7 @@ always @(posedge cpu_clk) begin
             RD1D_ID_EX_o <= 0;
             RD2D_ID_EX_o <= 0;
             funct3_ID_EX_o <= 0;
+            opcode_ID_EX_o <= 0;
         end else begin
             PC_ID_EX_o <= PC_ID_EX_i;
             PC_plus_4_ID_EX_o <= PC_plus_4_ID_EX_i;
@@ -114,6 +118,7 @@ always @(posedge cpu_clk) begin
             RD1D_ID_EX_o <= RD1D_ID_EX_i;
             RD2D_ID_EX_o <= RD2D_ID_EX_i;
             funct3_ID_EX_o <= funct3_ID_EX_i;
+            opcode_ID_EX_o <= opcode_ID_EX_i;
         end
     end
 end

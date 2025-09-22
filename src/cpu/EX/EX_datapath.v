@@ -25,6 +25,7 @@ module EX_datapath #(
     input wire [DATA_WIDTH-1:0] RD1D_ID_EX_o,
     input wire [DATA_WIDTH-1:0] RD2D_ID_EX_o,
     input wire [2:0] funct3_ID_EX_o,
+    input wire [6:0] opcode_ID_EX_o,
 
     // for forward rs1
     input wire [2:0] forward_detect_EX_rs1,
@@ -47,7 +48,8 @@ module EX_datapath #(
     output reg PC_take_jalr_EX,
     output reg signed [INST_ADDR_WIDTH-1:0] PC_for_jalr_EX,
     output reg signed [INST_ADDR_WIDTH-1:0] PC_for_normal_branch_EX,
-    output reg [2:0] funct3_EX
+    output reg [2:0] funct3_EX,
+    output reg [6:0] opcode_EX
 );
 
 wire signed [DATA_WIDTH-1:0] alu_in_rs1;
@@ -67,6 +69,7 @@ always @(*) begin
     rd_EX = rd_ID_EX_o;
     funct3_EX = funct3_ID_EX_o;
     PC_plus_4_EX = PC_plus_4_ID_EX_o;
+    opcode_EX = opcode_ID_EX_o;
 end
 
 always @(*) begin

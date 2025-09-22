@@ -39,7 +39,7 @@ module mux_for_rs2_EX_forward #(parameter DATA_WIDTH = 32)(
 always @(*) begin
     mux_for_rs2_EX_forward_res = RD2D_ID_EX_o;
     if(forward_detect_EX_rs2[`FORWARD_COLLISION_IN_MEM]) mux_for_rs2_EX_forward_res = alu_res_EX_MEM_o;
-    if(forward_detect_EX_rs2[`FORWARD_COLLISION_IN_WB]) mux_for_rs2_EX_forward_res = result_WB;
+    else if(forward_detect_EX_rs2[`FORWARD_COLLISION_IN_WB]) mux_for_rs2_EX_forward_res = result_WB;
 end
 
 endmodule

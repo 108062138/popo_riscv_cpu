@@ -1,5 +1,5 @@
 # limit_i = 5
-# limit_j = 3
+# limit_j = 4
 # hold = 11
 # i = 0
 # while(i<limit_i):
@@ -8,6 +8,7 @@
 #         hold += (i*j)
 #         j++
 #     i++
+# x3 = 72
 .text
 .global main
 main:
@@ -29,4 +30,5 @@ increment_i:
     addi x4, x4, 1
     j outer_for_loop
 done:
+    add x31, x0, x3
     addi, x31, x0, 666

@@ -4,7 +4,7 @@ module tb_chip();
 
 parameter CPU_CYC = 10;
 parameter SYS_CYC = 40;
-parameter max_cyc = 200;
+parameter max_cyc = 300;
 reg cpu_clk;
 reg sys_clk;
 reg cpu_rst_n;
@@ -80,7 +80,7 @@ always @(posedge cpu_clk) begin
         // u_chip.u_cpu.stall_PC_IF, u_chip.u_cpu.stall_IF_ID,
         // u_chip.u_cpu.flush_IF_ID, u_chip.u_cpu.flush_ID_EX);
 
-        $display("at cyc: %4d PC=%4d IF[%h] ID[%h] EX[%h] MEM[%h] WB[%h] wen:%b reg{%4d}<= %4d || mem_w:%b at mem{%4d}<=%4d with ra=%3d sp=%3d a0=%3d t0=%3d", cnt, 
+        $display("at cyc: %4d PC=%4d IF[%h] ID[%h] EX[%h] MEM[%h] WB[%h] wen:%b reg{%4d}<= %h || mem_w:%b at mem{%h}<=%h with ra=%3d sp=%3d a0=%3d t0=%3d", cnt, 
         u_chip.u_cpu.PC, u_chip.u_cpu.INST, u_chip.u_cpu.INST_ID, u_chip.u_cpu.INST_EX, u_chip.u_cpu.INST_MEM, u_chip.u_cpu.INST_WB,
         u_chip.u_cpu.u_regfile.we, u_chip.u_cpu.u_regfile.wd_addr, u_chip.u_cpu.u_regfile.wd_data,
         u_chip.u_L1_cache.u_data_mem.data_mem_write, u_chip.u_L1_cache.u_data_mem.cpu_data_mem_waddr, u_chip.u_L1_cache.u_data_mem.cpu_data_mem_wdata,

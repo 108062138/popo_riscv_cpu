@@ -2,7 +2,7 @@
     # C code:
     # int res, psum;
     # psum = 10;
-    # for(int i=0; i<3; i=i+1){
+    # for(int i=0; i<8; i=i+1){
     #     psum = psum + i;
     # }
     # res = psum;
@@ -10,9 +10,9 @@
     
     # Register Mapping:
     # x2: i
-    # x3: loop bound (3)
+    # x3: loop bound (8)
     # x1: psum
-    # x4: res
+    # x4: res: 76
     
 .text
 .global main
@@ -29,4 +29,4 @@ loop_condition:
 loop_end:
     addi x4, x1, 0        # 00038413 addr 7 28
     add x4, x4, x4        # 00840433 addr 8 32
-    addi x31, x0, 5
+    addi x31, x0, 666

@@ -88,7 +88,7 @@ wire [1:0] alu_sel_rs2_ID;
 wire pc_jal_sel_ID;
 wire [DATA_WIDTH-1:0] RD1D_ID, RD2D_ID;
 wire [2:0] funct3_ID;
-
+wire [6:0] opcode_ID;
 ID_datapath #( .INST_WIDTH(INST_WIDTH), .INST_ADDR_WIDTH(INST_ADDR_WIDTH), .DATA_WIDTH(DATA_WIDTH), .DATA_ADDR_WIDTH(DATA_ADDR_WIDTH)) u_ID_datapath (
     .INST_IF_ID_o(INST_IF_ID_o),
     .PC_IF_ID_o(PC_IF_ID_o),
@@ -110,7 +110,8 @@ ID_datapath #( .INST_WIDTH(INST_WIDTH), .INST_ADDR_WIDTH(INST_ADDR_WIDTH), .DATA
     .alu_sel_rs1_ID(alu_sel_rs1_ID),
     .alu_sel_rs2_ID(alu_sel_rs2_ID),
     .pc_jal_sel_ID(pc_jal_sel_ID),
-    .funct3_ID(funct3_ID)
+    .funct3_ID(funct3_ID),
+    .opcode_ID(opcode_ID)
 );
 
 wire [INST_ADDR_WIDTH-1:0] PC_ID_EX_o;
@@ -132,7 +133,7 @@ wire pc_jal_sel_ID_EX_o;
 wire [DATA_WIDTH-1:0] RD1D_ID_EX_o;
 wire [DATA_WIDTH-1:0] RD2D_ID_EX_o;
 wire [2:0] funct3_ID_EX_o;
-
+wire [6:0] opcode_ID_EX_o;
 ID_EX_pipeline #( .INST_WIDTH(INST_WIDTH), .INST_ADDR_WIDTH(INST_ADDR_WIDTH), .DATA_WIDTH(DATA_WIDTH), .DATA_ADDR_WIDTH(DATA_ADDR_WIDTH) ) u_ID_EX_pipeline (
     .cpu_clk(cpu_clk),
     .cpu_rst_n(cpu_rst_n),
@@ -157,6 +158,7 @@ ID_EX_pipeline #( .INST_WIDTH(INST_WIDTH), .INST_ADDR_WIDTH(INST_ADDR_WIDTH), .D
     .RD1D_ID_EX_i(RD1D_ID),
     .RD2D_ID_EX_i(RD2D_ID),
     .funct3_ID_EX_i(funct3_ID),
+    .opcode_ID_EX_i(opcode_ID),
 
     .PC_ID_EX_o(PC_ID_EX_o),
     .PC_plus_4_ID_EX_o(PC_plus_4_ID_EX_o),
@@ -176,7 +178,8 @@ ID_EX_pipeline #( .INST_WIDTH(INST_WIDTH), .INST_ADDR_WIDTH(INST_ADDR_WIDTH), .D
     .pc_jal_sel_ID_EX_o(pc_jal_sel_ID_EX_o),
     .RD1D_ID_EX_o(RD1D_ID_EX_o),
     .RD2D_ID_EX_o(RD2D_ID_EX_o),
-    .funct3_ID_EX_o(funct3_ID_EX_o)
+    .funct3_ID_EX_o(funct3_ID_EX_o),
+    .opcode_ID_EX_o(opcode_ID_EX_o)
 );
 
 wire [INST_WIDTH-1:0] INST_EX;
@@ -190,6 +193,7 @@ wire [REGISTER_ADDR_WIDTH-1:0] rd_EX;
 wire signed [DATA_WIDTH-1:0] write_data_EX;
 wire [INST_ADDR_WIDTH-1:0] PC_plus_4_EX;
 wire [2:0] funct3_EX;
+wire [6:0] opcode_EX;
 
 EX_datapath #( .INST_WIDTH(INST_WIDTH), .INST_ADDR_WIDTH(INST_ADDR_WIDTH), .DATA_WIDTH(DATA_WIDTH), .DATA_ADDR_WIDTH(DATA_ADDR_WIDTH)) u_EX_datapath (
     .PC_ID_EX_o(PC_ID_EX_o),
@@ -211,6 +215,7 @@ EX_datapath #( .INST_WIDTH(INST_WIDTH), .INST_ADDR_WIDTH(INST_ADDR_WIDTH), .DATA
     .RD1D_ID_EX_o(RD1D_ID_EX_o),
     .RD2D_ID_EX_o(RD2D_ID_EX_o),
     .funct3_ID_EX_o(funct3_ID_EX_o),
+    .opcode_ID_EX_o(opcode_ID_EX_o),
 
     // for forward rs1
     .forward_detect_EX_rs1(forward_detect_rs1),
@@ -233,7 +238,8 @@ EX_datapath #( .INST_WIDTH(INST_WIDTH), .INST_ADDR_WIDTH(INST_ADDR_WIDTH), .DATA
     .PC_take_jalr_EX(PC_take_jalr_EX),
     .PC_for_jalr_EX(PC_for_jalr_EX),
     .PC_for_normal_branch_EX(PC_for_normal_branch_EX),
-    .funct3_EX(funct3_EX)
+    .funct3_EX(funct3_EX),
+    .opcode_EX(opcode_EX)
 );
 
 wire [INST_WIDTH-1:0] INST_EX_MEM_o;
@@ -385,6 +391,8 @@ wire [2:0] forward_detect_rs2;
 forward_detection #(.REGISTER_ADDR_WIDTH(REGISTER_ADDR_WIDTH)) u_forward_detection (
     .reg_write_MEM(reg_write_MEM),
     .reg_write_WB(reg_write_WB),
+    .opcode_ID(opcode_ID),
+    .opcode_EX(opcode_EX),
     .rs1_ID(rs1_ID),
     .rs2_ID(rs2_ID),
     .rs1_EX(rs1_EX),
