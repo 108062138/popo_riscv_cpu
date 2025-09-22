@@ -13,13 +13,13 @@ CPU_SRCS_OPT        := $(wildcard src/cpu/*.v \
                                   src/cpu/EX/*.v \
                                   src/cpu/MEM/*.v \
                                   src/cpu/WB/*.v)
-CPU_SRCS_BASIC      := $(wildcard src/naive_five_stage_cpu/*.v \
-                                  src/naive_five_stage_cpu/IF/*.v \
-                                  src/naive_five_stage_cpu/PC/*.v \
-                                  src/naive_five_stage_cpu/ID/*.v \
-                                  src/naive_five_stage_cpu/EX/*.v \
-                                  src/naive_five_stage_cpu/MEM/*.v \
-                                  src/naive_five_stage_cpu/WB/*.v)
+CPU_SRCS_BASIC      := $(wildcard src/basic_five_stage_cpu/*.v \
+                                  src/basic_five_stage_cpu/IF/*.v \
+                                  src/basic_five_stage_cpu/PC/*.v \
+                                  src/basic_five_stage_cpu/ID/*.v \
+                                  src/basic_five_stage_cpu/EX/*.v \
+                                  src/basic_five_stage_cpu/MEM/*.v \
+                                  src/basic_five_stage_cpu/WB/*.v)
 
 ifeq ($(CPU_VERSION), basic)
 	CPU_SRCS := $(CPU_SRCS_BASIC)
