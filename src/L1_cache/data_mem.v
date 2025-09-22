@@ -88,9 +88,9 @@ always @(*) begin
                 end else if(cpu_data_mem_write_strobe==4'b0001) begin
                     concat_cpu_data_mem_wdata_0 = {mem[write_base_word_number][32-1:16], cpu_data_mem_wdata[8-1:0], mem[write_base_word_number][8-1:0]};
                     concat_cpu_data_mem_wdata_1 = mem[write_base_word_number+1];
-                end begin
-                    concat_cpu_data_mem_wdata_0 = 32'h09107519;
-                    concat_cpu_data_mem_wdata_1 = 32'h12345678;
+                end else begin
+                    concat_cpu_data_mem_wdata_0 = 32'h45645748;
+                    concat_cpu_data_mem_wdata_1 = 32'h80776168;
                 end
             end
             2:begin
@@ -118,7 +118,7 @@ always @(*) begin
                 end else if(cpu_data_mem_write_strobe==4'b0001) begin
                     concat_cpu_data_mem_wdata_0 = {cpu_data_mem_wdata[8-1:0], mem[write_base_word_number][24-1:0]};
                     concat_cpu_data_mem_wdata_1 = mem[write_base_word_number+1];
-                end begin
+                end else begin
                     concat_cpu_data_mem_wdata_0 = 32'h09107519;
                     concat_cpu_data_mem_wdata_1 = 32'h12345678;
                 end 
@@ -143,7 +143,6 @@ always @(posedge cpu_clk) begin
         if(data_mem_write_ctrl_by==cpu_ctrl)begin
             mem[write_base_word_number] <= #1 concat_cpu_data_mem_wdata_0;
             mem[write_base_word_number+1] <= #1 concat_cpu_data_mem_wdata_1;
-            $display("see strobe: %b", cpu_data_mem_write_strobe);
         end else begin
             mem[dma_data_mem_waddr] <= #1 dma_data_mem_wdata;
         end
