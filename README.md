@@ -41,7 +41,7 @@ step 0: clone main repo and enter the main working directory
     
     $ cd popo_cpu
 
-step 1: clone asm to hexa repo and make the python env aware of the python extension
+step 1: (selective)clone asm to hexa repo and make the python env aware of the python extension. You can directly copy `tb/hexa/?.mem` into `tb/word_inst.mem` to walk around step 1.
     
     $ git clone https://https://github.com/108062138/riscv-assembler.git
     
@@ -54,3 +54,17 @@ step 3: use makefile to run. for now, I provide two version of cpu to use: naive
     $ make sim_chip CPU_VERSION=basic
 
     $ make sim_chip CPU_VERSION=opt
+
+An success run should appear like:
+
+![sucess run](imgs/success_run.png)
+
+## auto test
+
+shell script `run_all.sh` is provided to enable auto test. Type the following command to test all tb and the result is stored in `sim_out`
+
+    $ chmod 777 run_all.sh
+
+    $ ./run_all.sh
+
+![log](imgs/executing_directory.png)
