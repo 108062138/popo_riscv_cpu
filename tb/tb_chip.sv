@@ -16,7 +16,7 @@ always #(SYS_CYC/2) sys_clk = ~sys_clk;
 initial begin
     wait(u_chip.u_cpu.u_regfile.rf[31]==666 || u_chip.u_cpu.u_regfile.rf[31]==404);
     if(u_chip.u_cpu.u_regfile.rf[31]==666) begin
-        $display("TEST PASS!");
+        $display("TEST PASS! Use cycle %d", cnt);
     end else begin
         $display("TEST FAIL!");
     end

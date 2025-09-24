@@ -66,3 +66,24 @@ control_unit u_control_unit (
 );
 
 endmodule
+
+// src/L1_cache/data_mem.v
+// src/L1_cache/inst_mem.v
+// src/L1_cache/L1_cache.v
+// src/basic_five_stage_cpu/cpu.v
+// src/basic_five_stage_cpu/EX_MEM_pipeline.v
+// src/basic_five_stage_cpu/forward_detection.v
+// src/basic_five_stage_cpu/hazard_detection.v
+// src/basic_five_stage_cpu/ID_EX_pipeline.v
+// src/basic_five_stage_cpu/IF_ID_pipeline.v
+// src/basic_five_stage_cpu/memory_hazard.v
+// src/basic_five_stage_cpu/MEM_WB_pipeline.v
+// src/basic_five_stage_cpu/PC_IF_pipeline.v
+// src/basic_five_stage_cpu/regfile.v
+// src/train_fix_forward_bug_five_stage_cpu/IF/IF_datapath.v
+// src/train_fix_forward_bug_five_stage_cpu/PC/PC_datapath.v
+// src/train_fix_forward_bug_five_stage_cpu/ID/control_unit.v
+// src/train_fix_forward_bug_five_stage_cpu/ID/decoder.v
+// src/train_fix_forward_bug_five_stage_cpu/ID/ID_datapath.v
+// src/train_fix_forward_bug_five_stage_cpu/ID/imm_unit.v
+// src/train_fix_forward_bug_five_stage_cpu/EX/alu.v src/train_fix_forward_bug_five_stage_cpu/EX/compare.v src/train_fix_forward_bug_five_stage_cpu/EX/EX_datapath.v src/train_fix_forward_bug_five_stage_cpu/EX/handle_rs1_for_alu.v src/train_fix_forward_bug_five_stage_cpu/EX/handle_rs2_for_alu.v src/train_fix_forward_bug_five_stage_cpu/MEM/MEM_datapath.v src/train_fix_forward_bug_five_stage_cpu/WB/WB_datapath.v
