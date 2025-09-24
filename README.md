@@ -37,9 +37,9 @@ For now, these three module has not been connected yet. And they are not finishe
 
 step 0: clone main repo and enter the main working directory
     
-    $ git clone https://github.com/108062138/popo_cpu.git
+    $ git clone https://github.com/108062138/popo_riscv_cpu.git
     
-    $ cd popo_cpu
+    $ cd popo_riscv_cpu
 
 step 1: (selective)clone asm to hexa repo and make the python env aware of the python extension. You can directly copy `tb/hexa/?.mem` into `tb/word_inst.mem` to walk around step 1.
     
