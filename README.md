@@ -67,4 +67,6 @@ shell script `run_all.sh` is provided to enable auto test. Type the following co
 
     $ ./run_all.sh
 
-![log](imgs/executing_directory.png)
+|   | bug-free  | bug  |
+|---|---|---|
+| img  | ![success run](imgs/success_compile_sucess_run.png)  | ![fail run](imgs/success_compile_bug_run.png)  |
