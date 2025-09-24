@@ -5,6 +5,7 @@ module hazard_detection #(parameter REGISTER_ADDR_WIDTH = 5)(
     // input
     input inst_mem_hazard,
     input data_mem_hazard,
+    input wire [1:0] early_jump,
     input wire [REGISTER_ADDR_WIDTH-1:0] rs1_ID,
     input wire [REGISTER_ADDR_WIDTH-1:0] rs2_ID,
     input wire [REGISTER_ADDR_WIDTH-1:0] rd_EX,
@@ -23,23 +24,35 @@ always @(*) begin
     stall_IF_ID = 0;
     flush_IF_ID = 0;
     flush_ID_EX = 0;
-
+    // priority: mem_hazard > branch detection hazard > load then use hazard > early branch
+    
+    // early branch
+    if(early_jump!=0)begin
+        stall_PC_IF = 0;
+        stall_IF_ID = 0;
+        flush_IF_ID = 1;
+        flush_ID_EX = 0;
+    end
+    // load then use
+    if(result_sel_EX==`SEL_MEM_AS_RES)begin
+        if(rd_EX!=0 && (rd_EX==rs1_ID || rd_EX==rs2_ID))begin
+            stall_PC_IF = 1;
+            stall_IF_ID = 1;
+            flush_IF_ID = 0;
+            flush_ID_EX = 1;
+        end
+    end
+    // inst mem hazard or data mem hazard
     if(inst_mem_hazard || data_mem_hazard)begin
         stall_PC_IF = 1;
         stall_IF_ID = 1;
         flush_IF_ID = 1;
         flush_ID_EX = 1; 
     end
-
-    if(result_sel_EX==`SEL_MEM_AS_RES)begin
-        if(rd_EX!=0 && (rd_EX==rs1_ID || rd_EX==rs2_ID))begin
-            stall_PC_IF = 1;
-            stall_IF_ID = 1;
-            flush_ID_EX = 1;
-        end
-    end
-
+    // branch hazard
     if(PC_take_branch_EX || PC_take_jalr_EX)begin
+        stall_PC_IF = 0;
+        stall_IF_ID = 0;
         flush_IF_ID = 1;
         flush_ID_EX = 1;
     end

@@ -34,6 +34,9 @@ PC_datapath #( .INST_WIDTH(INST_WIDTH), .INST_ADDR_WIDTH(INST_ADDR_WIDTH)) u_PC_
     .PC_for_normal_PC_plus_4(PC_for_normal_PC_plus_4),
     .PC_for_normal_branch(PC_for_normal_branch_EX),
     .PC_for_jalr(PC_for_jalr_EX),
+    .early_jump(early_jump),
+    .early_jump_jal_res(early_jump_jal_res),
+    .early_jump_jalr_res(early_jump_jalr_res),
     .n_PC(n_PC)
 );
 
@@ -89,6 +92,7 @@ wire pc_jal_sel_ID;
 wire [DATA_WIDTH-1:0] RD1D_ID, RD2D_ID;
 wire [2:0] funct3_ID;
 wire [6:0] opcode_ID;
+
 ID_datapath #( .INST_WIDTH(INST_WIDTH), .INST_ADDR_WIDTH(INST_ADDR_WIDTH), .DATA_WIDTH(DATA_WIDTH), .DATA_ADDR_WIDTH(DATA_ADDR_WIDTH)) u_ID_datapath (
     .INST_IF_ID_o(INST_IF_ID_o),
     .PC_IF_ID_o(PC_IF_ID_o),
@@ -112,6 +116,34 @@ ID_datapath #( .INST_WIDTH(INST_WIDTH), .INST_ADDR_WIDTH(INST_ADDR_WIDTH), .DATA
     .pc_jal_sel_ID(pc_jal_sel_ID),
     .funct3_ID(funct3_ID),
     .opcode_ID(opcode_ID)
+);
+
+wire [DATA_WIDTH-1:0] early_jump_jal_res;
+wire [DATA_WIDTH-1:0] early_jump_jalr_res;
+wire [1:0] early_jump;
+
+ID_early_jump #( .INST_WIDTH(INST_WIDTH), .INST_ADDR_WIDTH(INST_ADDR_WIDTH), .DATA_WIDTH(DATA_WIDTH), .DATA_ADDR_WIDTH(DATA_ADDR_WIDTH), .REGISTER_WIDTH(REGISTER_WIDTH), .REGISTER_ADDR_WIDTH(REGISTER_ADDR_WIDTH)) u_ID_early_jump (
+    .opcode_ID(opcode_ID),
+    .opcode_EX(opcode_EX),
+    .reg_write_EX(reg_write_EX),
+    .reg_write_MEM(reg_write_MEM),
+    .reg_write_WB(reg_write_WB),
+    .rs1_ID(rs1_ID),
+    .rd_EX(rd_EX),
+    .rd_MEM(rd_MEM),
+    .rd_WB(rd_WB),
+    // for jal
+    .PC_ID(PC_ID),
+    // for jalr
+    .RD1D_ID(RD1D_ID),
+    .alu_res_EX(alu_res_EX),
+    .alu_res_MEM(alu_res_MEM),
+    .result_WB(result_WB),
+    // both jal and jalr use imm_ID
+    .imm_ID(imm_ID),
+    .early_jump_jal_res(early_jump_jal_res),
+    .early_jump_jalr_res(early_jump_jalr_res),
+    .early_jump(early_jump)
 );
 
 wire [INST_ADDR_WIDTH-1:0] PC_ID_EX_o;
@@ -373,6 +405,7 @@ wire flush_IF_ID, flush_ID_EX;
 hazard_detection #(.REGISTER_ADDR_WIDTH(REGISTER_ADDR_WIDTH)) u_hazard_detction (
     .inst_mem_hazard(inst_mem_hazard),
     .data_mem_hazard(data_mem_hazard),
+    .early_jump(early_jump),
     .rs1_ID(rs1_ID),
     .rs2_ID(rs2_ID),
     .rd_EX(rd_EX),

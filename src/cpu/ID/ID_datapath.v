@@ -8,8 +8,8 @@ module ID_datapath #(
 )(
     input wire [INST_WIDTH-1:0] INST_IF_ID_o,
     input wire [INST_ADDR_WIDTH-1:0] PC_IF_ID_o,
-    output reg [INST_ADDR_WIDTH-1:0] PC_ID,
     input wire [INST_ADDR_WIDTH-1:0] PC_plus_4_IF_ID_o,
+    output reg [INST_ADDR_WIDTH-1:0] PC_ID,
     output reg [INST_ADDR_WIDTH-1:0] PC_plus_4_ID,
     output reg [INST_WIDTH-1:0] INST_ID,
     output reg [5-1:0] rs1_ID,
@@ -52,6 +52,7 @@ decoder #(.INST_WIDTH(INST_WIDTH),.DATA_WIDTH(DATA_WIDTH)) u_decoder (
     .rd(rd_ID),
     .imm(imm_ID)
 );
+
 control_unit u_control_unit (
     .funct7(funct7),
     .funct3(funct3),

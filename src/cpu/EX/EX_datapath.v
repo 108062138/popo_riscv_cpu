@@ -77,7 +77,7 @@ always @(*) begin
     PC_for_normal_branch_EX = PC_ID_EX_o + imm_ID_EX_o;
     PC_take_jalr_EX = (uncond_jump_ID_EX_o == 2);
     PC_take_branch_EX = 0;
-    if(uncond_jump_ID_EX_o!=0 || branch_decision) PC_take_branch_EX = 1;
+    if(uncond_jump_ID_EX_o==2'b10 || branch_decision) PC_take_branch_EX = 1; // jal is removed
 end
 
 compare #(.DATA_WIDTH(DATA_WIDTH)) u_compare (

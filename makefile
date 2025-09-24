@@ -5,6 +5,7 @@ L1_CACHE_SRCS  		:= $(wildcard src/L1_cache/*.v)
 ASYNCFIFO_SRCS    	:= $(wildcard src/asyncfifo/*.v)
 BUS_INTEGRATE_SRCS	:= $(wildcard src/bus_integrate/*.v)
 MEMORY_SRCS			:= $(wildcard src/memory/*.v)
+# three type of cpu is offered: bug naive five stage, naive five stage, opt five stage
 CPU_VERSION         := basic
 CPU_SRCS_OPT        := $(wildcard src/cpu/*.v \
                                   src/cpu/IF/*.v \
@@ -20,12 +21,21 @@ CPU_SRCS_BASIC      := $(wildcard src/basic_five_stage_cpu/*.v \
                                   src/basic_five_stage_cpu/EX/*.v \
                                   src/basic_five_stage_cpu/MEM/*.v \
                                   src/basic_five_stage_cpu/WB/*.v)
+CPU_SRCS_TRAIN_FIX_FORWARD_BUG  := $(wildcard src/basic_five_stage_cpu/*.v \
+                                  			  src/train_fix_forward_bug_five_stage_cpu/IF/*.v \
+                                  			  src/train_fix_forward_bug_five_stage_cpu/PC/*.v \
+                                  			  src/train_fix_forward_bug_five_stage_cpu/ID/*.v \
+                                  			  src/train_fix_forward_bug_five_stage_cpu/EX/*.v \
+                                  			  src/train_fix_forward_bug_five_stage_cpu/MEM/*.v \
+                                  			  src/train_fix_forward_bug_five_stage_cpu/WB/*.v)
 
 ifeq ($(CPU_VERSION), basic)
 	CPU_SRCS := $(CPU_SRCS_BASIC)
 else ifeq ($(CPU_VERSION), opt)
 	CPU_SRCS := $(CPU_SRCS_OPT)
-else
+else ifeq ($(CPU_VERSION), train_fix_forwrad_bug)
+	CPU_SRCS := $(CPU_SRCS_TRAIN_FIX_FORWARD_BUG)
+else 
     $(error Unknown CPU_VERSION '$(CPU_VERSION)', must be 'basic' or 'opt')
 endif
 # ==== Build ====

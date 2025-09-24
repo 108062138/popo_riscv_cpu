@@ -30,5 +30,13 @@ increment_i:
     addi x4, x4, 1
     j outer_for_loop
 done:
-    add x31, x0, x3
+    addi x15, x0, 72
+    bne x15, x3, fuck_up
     addi, x31, x0, 666
+    nop
+    nop
+    nop
+    nop
+    nop
+fuck_up:
+    addi x31, x0, 404

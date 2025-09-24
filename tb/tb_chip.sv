@@ -4,7 +4,7 @@ module tb_chip();
 
 parameter CPU_CYC = 10;
 parameter SYS_CYC = 40;
-parameter max_cyc = 300;
+parameter max_cyc = 600;
 reg cpu_clk;
 reg sys_clk;
 reg cpu_rst_n;
@@ -14,11 +14,17 @@ initial cpu_clk = 0;
 always #(CPU_CYC/2) cpu_clk = ~cpu_clk;
 always #(SYS_CYC/2) sys_clk = ~sys_clk;
 initial begin
-    wait(u_chip.u_cpu.u_regfile.rf[31]==666);
+    wait(u_chip.u_cpu.u_regfile.rf[31]==666 || u_chip.u_cpu.u_regfile.rf[31]==404);
+    if(u_chip.u_cpu.u_regfile.rf[31]==666) begin
+        $display("TEST PASS!");
+    end else begin
+        $display("TEST FAIL!");
+    end
     $finish;
 end
 initial begin
     repeat(max_cyc) @(posedge cpu_clk);
+    $display("Error: Exceed max cycle %d", max_cyc);
     $finish;
 end
 initial begin

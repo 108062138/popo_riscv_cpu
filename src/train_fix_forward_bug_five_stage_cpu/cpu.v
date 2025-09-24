@@ -410,7 +410,7 @@ regfile #(.INIT_STYLE(1), .REGISTER_WIDTH(REGISTER_WIDTH), .REGISTER_ADDR_WIDTH(
 );
 
 initial begin
-    $display("using naive five stage cpu");
+    $display("using rs2 forward bug cpu");
 end
 
 endmodule

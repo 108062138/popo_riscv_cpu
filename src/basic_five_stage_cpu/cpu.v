@@ -418,7 +418,7 @@ regfile #(.INIT_STYLE(1), .REGISTER_WIDTH(REGISTER_WIDTH), .REGISTER_ADDR_WIDTH(
 );
 
 initial begin
-    $display("using opt cpu");
+    $display("using basic five stage cpu");
 end
 
 endmodule
