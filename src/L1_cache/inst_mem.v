@@ -29,30 +29,4 @@ always @(posedge cpu_clk) begin
     end
 end
 
-reg [INST_WIDTH-1:0] word_0;
-reg [INST_WIDTH-1:0] word_1;
-reg [INST_WIDTH-1:0] word_2;
-reg [INST_WIDTH-1:0] word_3;
-reg [INST_WIDTH-1:0] word_4;
-reg [INST_WIDTH-1:0] word_5;
-reg [INST_WIDTH-1:0] word_6;
-reg [INST_WIDTH-1:0] word_7;
-reg [INST_WIDTH-1:0] word_8;
-reg [INST_WIDTH-1:0] word_9;
-reg [INST_WIDTH-1:0] word_10;
-
-always @(*) begin
-    word_0 = mem[0];
-    word_1 = mem[1];
-    word_2 = mem[2];
-    word_3 = mem[3];
-    word_4 = mem[4];
-    word_5 = mem[5];
-    word_6 = mem[6];
-    word_7 = mem[7];
-    word_8 = mem[8];
-    word_9 = mem[9];
-    word_10 = mem[10];
-end
-
 endmodule

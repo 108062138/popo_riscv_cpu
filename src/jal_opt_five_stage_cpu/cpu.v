@@ -1,3 +1,5 @@
+`include "riscv_defs.vh"
+
 module cpu #(
     parameter INST_WIDTH = 32,
     parameter INST_ADDR_WIDTH = 32,
@@ -21,22 +23,22 @@ module cpu #(
     output wire [3:0] cpu_data_mem_write_strobe
 );
 
-wire [INST_ADDR_WIDTH-1:0] PC_plus_4_normal;
+wire PC_take_branch_EX;
+wire PC_take_jalr_EX;
+wire signed [INST_ADDR_WIDTH-1:0] PC_for_jalr_EX;
+wire signed [INST_ADDR_WIDTH-1:0] PC_for_normal_branch_EX;
+wire signed [INST_ADDR_WIDTH-1:0] PC_for_normal_PC_plus_4;
 wire [INST_ADDR_WIDTH-1:0] n_PC;
-assign PC_plus_4_normal = PC_plus_4_IF_ID_i;
-
+assign PC_for_normal_PC_plus_4 = PC_plus_4_IF_ID_i;
 PC_datapath #( .INST_WIDTH(INST_WIDTH), .INST_ADDR_WIDTH(INST_ADDR_WIDTH)) u_PC_datapath (
-    .predict_branch_taken_ID(predict_branch_taken_ID),
-    .early_jal_ID(early_jal_ID),
-    .fix_predict_EX(fix_predict_EX),
-    .meet_jalr_EX(meet_jalr_EX),
-
-    .predict_branch_taken_PC_ID(predict_branch_taken_PC_ID),
-    .early_jal_PC_ID(early_jal_PC_ID),
-    .PC_plus_4_normal(PC_plus_4_normal),
-    .meet_jalr_PC_EX(meet_jalr_PC_EX),
-    .fix_predict_PC_EX(fix_predict_PC_EX),
-
+    .PC_take_branch(PC_take_branch_EX),
+    .PC_take_jalr(PC_take_jalr_EX),
+    .PC_for_normal_PC_plus_4(PC_for_normal_PC_plus_4),
+    .PC_for_normal_branch(PC_for_normal_branch_EX),
+    .PC_for_jalr(PC_for_jalr_EX),
+    .early_jump(early_jump),
+    .early_jump_jal_res(early_jump_jal_res),
+    .early_jump_jalr_res(early_jump_jalr_res),
     .n_PC(n_PC)
 );
 
@@ -118,15 +120,32 @@ ID_datapath #( .INST_WIDTH(INST_WIDTH), .INST_ADDR_WIDTH(INST_ADDR_WIDTH), .DATA
     .opcode_ID(opcode_ID)
 );
 
-wire [INST_ADDR_WIDTH-1:0] early_jal_PC_ID;
-wire early_jal_ID;
+wire [DATA_WIDTH-1:0] early_jump_jal_res;
+wire [DATA_WIDTH-1:0] early_jump_jalr_res;
+wire [1:0] early_jump;
 
 ID_early_jump #( .INST_WIDTH(INST_WIDTH), .INST_ADDR_WIDTH(INST_ADDR_WIDTH), .DATA_WIDTH(DATA_WIDTH), .DATA_ADDR_WIDTH(DATA_ADDR_WIDTH), .REGISTER_WIDTH(REGISTER_WIDTH), .REGISTER_ADDR_WIDTH(REGISTER_ADDR_WIDTH)) u_ID_early_jump (
     .opcode_ID(opcode_ID),
+    .opcode_EX(opcode_EX),
+    .reg_write_EX(reg_write_EX),
+    .reg_write_MEM(reg_write_MEM),
+    .reg_write_WB(reg_write_WB),
+    .rs1_ID(rs1_ID),
+    .rd_EX(rd_EX),
+    .rd_MEM(rd_MEM),
+    .rd_WB(rd_WB),
+    // for jal
     .PC_ID(PC_ID),
+    // for jalr
+    .RD1D_ID(RD1D_ID),
+    .alu_res_EX(alu_res_EX),
+    .alu_res_MEM(alu_res_MEM),
+    .result_WB(result_WB),
+    // both jal and jalr use imm_ID
     .imm_ID(imm_ID),
-    .early_jal_PC_ID(early_jal_PC_ID),
-    .early_jal_ID(early_jal_ID)
+    .early_jump_jal_res(early_jump_jal_res),
+    .early_jump_jalr_res(early_jump_jalr_res),
+    .early_jump(early_jump)
 );
 
 wire [INST_ADDR_WIDTH-1:0] PC_ID_EX_o;
@@ -207,13 +226,9 @@ wire [REGISTER_ADDR_WIDTH-1:0] rs2_EX;
 wire [REGISTER_ADDR_WIDTH-1:0] rd_EX;
 wire signed [DATA_WIDTH-1:0] write_data_EX;
 wire [INST_ADDR_WIDTH-1:0] PC_plus_4_EX;
-wire [INST_ADDR_WIDTH-1:0] PC_EX;
-wire [INST_ADDR_WIDTH-1:0] imm_EX;
 wire [2:0] funct3_EX;
 wire [6:0] opcode_EX;
-wire meet_jalr_EX;
-wire [INST_ADDR_WIDTH-1:0] meet_jalr_PC_EX;
-wire branch_res_EX;
+wire branch_decision;
 
 EX_datapath #( .INST_WIDTH(INST_WIDTH), .INST_ADDR_WIDTH(INST_ADDR_WIDTH), .DATA_WIDTH(DATA_WIDTH), .DATA_ADDR_WIDTH(DATA_ADDR_WIDTH)) u_EX_datapath (
     .PC_ID_EX_o(PC_ID_EX_o),
@@ -254,15 +269,26 @@ EX_datapath #( .INST_WIDTH(INST_WIDTH), .INST_ADDR_WIDTH(INST_ADDR_WIDTH), .DATA
     .rd_EX(rd_EX),
     .write_data_EX(write_data_EX),
     .PC_plus_4_EX(PC_plus_4_EX),
-    .PC_EX(PC_EX),
-    .imm_EX(imm_EX),
-    .meet_jalr_EX(meet_jalr_EX),
-    .meet_jalr_PC_EX(meet_jalr_PC_EX),
-    .branch_res_EX(branch_res_EX),
+    .PC_take_branch_EX(PC_take_branch_EX),
+    .PC_take_jalr_EX(PC_take_jalr_EX),
+    .PC_for_jalr_EX(PC_for_jalr_EX),
+    .PC_for_normal_branch_EX(PC_for_normal_branch_EX),
     .funct3_EX(funct3_EX),
-    .opcode_EX(opcode_EX)
+    .opcode_EX(opcode_EX),
+    .branch_decision(branch_decision)
 );
 
+reg [32-1:0] num_fault, n_num_fault;
+
+always @(*) begin
+    n_num_fault = num_fault;
+    if(opcode_EX==`BRANCH) if(branch_decision)
+        n_num_fault = num_fault + 1;
+end
+always @(posedge cpu_clk) begin
+    if(!cpu_rst_n) num_fault <= 0;
+    else num_fault <= n_num_fault;
+end
 wire [INST_WIDTH-1:0] INST_EX_MEM_o;
 wire reg_write_EX_MEM_o;
 wire mem_write_EX_MEM_o;
@@ -388,44 +414,19 @@ WB_datapath #( .INST_WIDTH(INST_WIDTH), .INST_ADDR_WIDTH(INST_ADDR_WIDTH), .DATA
     .funct3_WB(funct3_WB)
 );
 
-wire predict_branch_taken_ID;
-wire [INST_ADDR_WIDTH-1:0] predict_branch_taken_PC_ID;
-wire fix_predict_EX;
-wire [INST_ADDR_WIDTH-1:0] fix_predict_PC_EX;
-
-branch_prediction #( .INST_WIDTH(INST_WIDTH), .INST_ADDR_WIDTH(INST_ADDR_WIDTH), .DATA_WIDTH(DATA_WIDTH), .DATA_ADDR_WIDTH(DATA_ADDR_WIDTH), .REGISTER_WIDTH(REGISTER_WIDTH), .REGISTER_ADDR_WIDTH(REGISTER_ADDR_WIDTH)) u_branch_detection (
-    .cpu_clk(cpu_clk),
-    .cpu_rst_n(cpu_rst_n),
-    .opcode_ID(opcode_ID),
-    .opcode_EX(opcode_EX),
-    .PC_plus_4_ID(PC_plus_4_ID),
-    .PC_ID(PC_ID),
-    .imm_ID(imm_ID),
-    .PC_plus_4_EX(PC_plus_4_EX),
-    .PC_EX(PC_EX),
-    .imm_EX(imm_EX),
-    .branch_res_EX(branch_res_EX),
-    .predict_branch_taken_ID(predict_branch_taken_ID),
-    .predict_branch_taken_PC_ID(predict_branch_taken_PC_ID),
-    .fix_predict_EX(fix_predict_EX),
-    .fix_predict_PC_EX(fix_predict_PC_EX)
-);
-
 wire stall_PC_IF,stall_IF_ID;
 wire flush_IF_ID, flush_ID_EX;
 
 hazard_detection #(.REGISTER_ADDR_WIDTH(REGISTER_ADDR_WIDTH)) u_hazard_detction (
     .inst_mem_hazard(inst_mem_hazard),
     .data_mem_hazard(data_mem_hazard),
-    .early_jal_ID(early_jal_ID),
-    .predict_branch_taken_ID(predict_branch_taken_ID),
+    .early_jump(early_jump),
     .rs1_ID(rs1_ID),
     .rs2_ID(rs2_ID),
     .rd_EX(rd_EX),
     .result_sel_EX(result_sel_EX),
-    .meet_jalr_EX(meet_jalr_EX),
-    .fix_predict_EX(fix_predict_EX),
-
+    .PC_take_branch_EX(PC_take_branch_EX),
+    .PC_take_jalr_EX(PC_take_jalr_EX),
     .stall_PC_IF(stall_PC_IF),
     .stall_IF_ID(stall_IF_ID),
     .flush_IF_ID(flush_IF_ID),
@@ -465,7 +466,7 @@ regfile #(.INIT_STYLE(1), .REGISTER_WIDTH(REGISTER_WIDTH), .REGISTER_ADDR_WIDTH(
 );
 
 initial begin
-    $display("using branch prediction cpu");
+    $display("using jal opt cpu");
 end
 
 endmodule

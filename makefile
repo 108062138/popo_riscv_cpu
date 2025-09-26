@@ -28,6 +28,13 @@ CPU_SRCS_TRAIN_FIX_FORWARD_BUG  := $(wildcard src/train_fix_forward_bug_five_sta
                                   			  src/train_fix_forward_bug_five_stage_cpu/EX/*.v \
                                   			  src/train_fix_forward_bug_five_stage_cpu/MEM/*.v \
                                   			  src/train_fix_forward_bug_five_stage_cpu/WB/*.v)
+CPU_SRCS_JAL_OPT    := $(wildcard src/jal_opt_five_stage_cpu/*.v \
+                                  src/jal_opt_five_stage_cpu/IF/*.v \
+                                  src/jal_opt_five_stage_cpu/PC/*.v \
+                                  src/jal_opt_five_stage_cpu/ID/*.v \
+                                  src/jal_opt_five_stage_cpu/EX/*.v \
+                                  src/jal_opt_five_stage_cpu/MEM/*.v \
+                                  src/jal_opt_five_stage_cpu/WB/*.v)
 
 ifeq ($(CPU_VERSION), basic)
 	CPU_SRCS := $(CPU_SRCS_BASIC)
@@ -35,6 +42,8 @@ else ifeq ($(CPU_VERSION), opt)
 	CPU_SRCS := $(CPU_SRCS_OPT)
 else ifeq ($(CPU_VERSION), train_fix_forward_bug)
 	CPU_SRCS := $(CPU_SRCS_TRAIN_FIX_FORWARD_BUG)
+else ifeq ($(CPU_VERSION), jal_opt)
+	CPU_SRCS := $(CPU_SRCS_JAL_OPT)
 else 
     $(error Unknown CPU_VERSION '$(CPU_VERSION)', must be 'basic' or 'opt' or 'train_fix_forward_bug')
 endif

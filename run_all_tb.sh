@@ -4,15 +4,15 @@ RED='\033[0;31m'
 NC='\033[0m'
 # Check if an argument was provided
 if [ -z "$1" ]; then
-  echo "No CPU version provided. Using 'opt' as default. Currently support 'opt', 'basic', 'train_fix_forward_bug' for cpu"
+  echo "No CPU version provided. Using 'opt' as default. Currently support 'opt', 'basic', 'train_fix_forward_bug', 'jal_opt' for cpu"
   CPU_VERSION="opt"
 else
   CPU_VERSION=$1
 fi
 make clean
-make sim_chip CPU_VERSION=$CPU_VERSION > "sim_out_$CPU_VERSION/compile.log"
 rm -r sim_out_$CPU_VERSION
 mkdir -p sim_out_$CPU_VERSION
+make sim_chip CPU_VERSION=$CPU_VERSION > "sim_out_$CPU_VERSION/compile.log"
 # iterate through the hexas folder and cp it to word_inst.mem one by one, then make run
 for file in ./tb/hexas/*.mem; do
     cp $file ./tb/word_inst.mem

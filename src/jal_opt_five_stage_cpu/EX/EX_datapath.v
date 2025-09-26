@@ -44,13 +44,13 @@ module EX_datapath #(
     output reg [REGISTER_ADDR_WIDTH-1:0] rd_EX,
     output wire signed [DATA_WIDTH-1:0] write_data_EX,
     output reg [INST_ADDR_WIDTH-1:0] PC_plus_4_EX,
-    output reg [INST_ADDR_WIDTH-1:0] imm_EX,
-    output reg [INST_ADDR_WIDTH-1:0] PC_EX,
-    output wire branch_res_EX,
-    output reg meet_jalr_EX,
-    output reg signed [INST_ADDR_WIDTH-1:0] meet_jalr_PC_EX,
+    output reg PC_take_branch_EX,
+    output reg PC_take_jalr_EX,
+    output reg signed [INST_ADDR_WIDTH-1:0] PC_for_jalr_EX,
+    output reg signed [INST_ADDR_WIDTH-1:0] PC_for_normal_branch_EX,
     output reg [2:0] funct3_EX,
-    output reg [6:0] opcode_EX
+    output reg [6:0] opcode_EX,
+    output wire branch_decision
 );
 
 wire signed [DATA_WIDTH-1:0] alu_in_rs1;
@@ -69,13 +69,14 @@ always @(*) begin
     funct3_EX = funct3_ID_EX_o;
     PC_plus_4_EX = PC_plus_4_ID_EX_o;
     opcode_EX = opcode_ID_EX_o;
-    PC_EX = PC_ID_EX_o;
-    imm_EX = imm_ID_EX_o;
 end
 
 always @(*) begin
-    meet_jalr_EX = (uncond_jump_ID_EX_o == 2);
-    meet_jalr_PC_EX = forward_rs1 + imm_ID_EX_o;
+    PC_for_jalr_EX = forward_rs1 + imm_ID_EX_o;
+    PC_for_normal_branch_EX = PC_ID_EX_o + imm_ID_EX_o;
+    PC_take_jalr_EX = (uncond_jump_ID_EX_o == 2);
+    PC_take_branch_EX = 0;
+    if(uncond_jump_ID_EX_o==2'b10 || branch_decision) PC_take_branch_EX = 1; // jal is removed
 end
 
 compare #(.DATA_WIDTH(DATA_WIDTH)) u_compare (
@@ -83,7 +84,7 @@ compare #(.DATA_WIDTH(DATA_WIDTH)) u_compare (
     .forward_rs1(forward_rs1),
     .forward_rs2(forward_rs2),
     .meet_branch_ID_EX_o(meet_branch_ID_EX_o),
-    .branch_decision(branch_res_EX)
+    .branch_decision(branch_decision)
 );
 
 alu #(.DATA_WIDTH(DATA_WIDTH)) u_alu (
