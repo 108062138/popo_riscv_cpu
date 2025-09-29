@@ -3,8 +3,7 @@ main:
     addi a1, x0, 10 # 04: 00500593, a1 = len(arr) 00500593 
     jal fill_data, x1 # 08: 048000ef, offset 72 
     jal bubble_sort, x1 # 12: 00c000ef, offset = 12 
-    jal done, x1 # 16: 06c000ef, offset = 108 
-    addi x31, x0, 666 # 20: 29a00f93 
+    jal check, x1 # 16: 06c000ef, offset = 108 
 bubble_sort: 
     addi t0, x0, 0 # 24:00000293, t0 denoted as finish_swap flag 
     addi t1, x0, 1 # 28:00100313, t1 denoted as i 
@@ -49,5 +48,28 @@ fill_data:
     addi t2, x0, 4 #112: fff00393 
     sb t2, 10(a0) #116: 00750223 
     jalr x0, x1, 0 #120: 00008067 
-done: 
-    addi x31, x0, 666 #124 29a00f93
+check:
+    addi t0, x0, 0
+    addi a2, a1, -1
+cmp:
+    beq t0, a2, finish_sort
+    add t1, t0, a0
+    lb t2, 0(t1)
+    lb t3, 1(t1)
+    blt t3, t2, fuck_up
+    addi t0, t0, 1
+    jal cmp, x0
+finish_sort:
+    addi x31, x0, 666
+    nop
+    nop
+    nop
+    nop
+    nop
+fuck_up:
+    addi x31, x0, 404
+    nop
+    nop
+    nop
+    nop
+    nop
