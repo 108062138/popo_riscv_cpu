@@ -17,7 +17,7 @@ module sram_wrapper_dual_port #(
 reg [DATA_WIDTH-1:0] mem [0:NUM_WORDS-1];
 
 initial begin
-    if(INIT_BY==0)$readmemh("/home/popo/Desktop/popo_train_cpu/popo_cpu/tb/slow_data.mem", mem);
+    if(INIT_BY==0)$readmemh("tb/slow_data.mem", mem);
 end
 
 always@(posedge clk)begin

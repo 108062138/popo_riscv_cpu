@@ -26,7 +26,7 @@ reg [DATA_WIDTH-1:0] mem [0:NUM_WORDS-1];
 
 initial begin
     $display("hahah");
-    $readmemh("/home/popo/Desktop/popo_train_cpu/popo_cpu/tb/word_data.mem", mem);
+    $readmemh("tb/word_data.mem", mem);
 end
 
 reg [1:0] read_offset;

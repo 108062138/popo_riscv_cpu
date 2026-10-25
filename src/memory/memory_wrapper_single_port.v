@@ -18,8 +18,8 @@ reg [32-1:0] mem [0:NUM_WORDS-1];
 integer i;
 initial begin
     // INIT_BY: 0-none, 1-inst.txt, 2-data.txt
-    if(INIT_BY==1)      $readmemh("/home/popo/Desktop/popo_train_cpu/popo_cpu/tb/inst.mem", mem);
-    else if(INIT_BY==2) $readmemh("/home/popo/Desktop/popo_train_cpu/popo_cpu/tb/data.mem", mem);
+    if(INIT_BY==1)      $readmemh("tb/inst.mem", mem);
+    else if(INIT_BY==2) $readmemh("tb/data.mem", mem);
 end
 
 always@(posedge clk)begin
