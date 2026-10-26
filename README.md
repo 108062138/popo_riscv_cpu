@@ -41,9 +41,9 @@ step 0: clone main repo and enter the main working directory
     
     $ cd popo_riscv_cpu
 
-step 1: (selective)clone asm to hexa repo and make the python env aware of the python extension. You can directly copy `tb/hexa/?.mem` into `tb/word_inst.mem` to walk around step 1. Any modification in assembly code requires an re-compilation it into its corresponding instruction mem. To do so, we have to re-run `compile_all_tb.py` again.
+step 1: (selective)clone asm to hexa repo and make the python env aware of the python extension. You can directly copy `tb/hexas/?.mem` into `tb/word_inst.mem` to walk around step 1. Any modification in assembly code requires an re-compilation it into its corresponding instruction mem. To do so, we have to re-run `compile_all_tb.py` again.
     
-    $ git clone https://https://github.com/108062138/riscv-assembler.git
+    $ git clone https://github.com/108062138/riscv-assembler.git
     
     $ pip install -e ./riscv-assembler
 
@@ -51,7 +51,7 @@ step 1: (selective)clone asm to hexa repo and make the python env aware of the p
 
 step 2: change file path when possible in src/L1_cache/inst_mem accordingly. Let's say I want to `test_load_then_use` testcase.
 
-    $ cp tb/hexa/test_load_then_use.mem tb/word_inst.mem
+    $ cp tb/hexas/test_load_then_use.mem tb/word_inst.mem
 
 step 3: use makefile to run. for now, I provide two version of cpu to use: naive and opt, which can be specified by `CPU_VERSION`. Several versions are supported: `basic`, `opt`, `train_fix_bug_forward_bug`. An success run should appear like the following screenshoot.
 
@@ -59,13 +59,22 @@ step 3: use makefile to run. for now, I provide two version of cpu to use: naive
 
 ![sucess run](imgs/success_run.png)
 
+## branch predictor options (opt CPU)
+
+    $ make sim_chip CPU_VERSION=opt PRED=bht BTB=1
+
+`PRED` picks the direction predictor: `static` (always not taken), `global` (one shared 2-bit counter) or `bht`
+(16 per-branch 2-bit counters, default). `BTB=1` (default) adds a 16-entry branch target buffer in IF so `jal`
+and predicted-taken branches lose no cycle. The same variables work with `run_all_tb.sh`, e.g.
+`PRED=global BTB=0 ./run_all_tb.sh opt`.
+
 ## auto test
 
-shell script `run_all.sh` is provided to enable auto test. Type the following command to test all tb and the result is stored in `sim_out`.
+shell script `run_all_tb.sh` is provided to enable auto test. Type the following command to test all tb with one CPU version (`opt` by default) and the result is stored in `sim_out_<version>`. A test passes only if the program reports success (`x31 == 666`) **and** every committed instruction and store matches the reference model `tb/iss/rv32_iss.py`; on a mismatch the first differing instruction is printed.
 
-    $ chmod 777 run_all.sh
+    $ chmod +x run_all_tb.sh
 
-    $ ./run_all.sh
+    $ ./run_all_tb.sh opt
 
 |   | bug-free  | bug  |
 |---|---|---|
