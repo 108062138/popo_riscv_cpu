@@ -11,7 +11,9 @@ module IF_ID_pipeline #(
     input wire [INST_ADDR_WIDTH-1:0] PC_plus_4_IF_ID_i,
     output reg [INST_ADDR_WIDTH-1:0] PC_plus_4_IF_ID_o,
     input wire [INST_WIDTH-1:0] INST_IF_ID_i,
-    output reg [INST_WIDTH-1:0] INST_IF_ID_o
+    output reg [INST_WIDTH-1:0] INST_IF_ID_o,
+    input wire btb_redirect_IF_ID_i,
+    output reg btb_redirect_IF_ID_o
 );
 
 always @(posedge cpu_clk) begin
@@ -19,20 +21,24 @@ always @(posedge cpu_clk) begin
         PC_IF_ID_o <= 0;
         PC_plus_4_IF_ID_o <= 0;
         INST_IF_ID_o <= 0;
+        btb_redirect_IF_ID_o <= 0;
     end else begin
         if(flush_IF_ID)begin
             PC_IF_ID_o <= 0;
             PC_plus_4_IF_ID_o <= 0;
             INST_IF_ID_o <= 0;
+            btb_redirect_IF_ID_o <= 0;
         end else begin
             if(stall_IF_ID)begin
                 PC_IF_ID_o <= PC_IF_ID_o;
                 PC_plus_4_IF_ID_o <= PC_plus_4_IF_ID_o;
                 INST_IF_ID_o <= INST_IF_ID_o;
+                btb_redirect_IF_ID_o <= btb_redirect_IF_ID_o;
             end else begin
                 PC_IF_ID_o <= PC_IF_ID_i;
                 PC_plus_4_IF_ID_o <=  PC_plus_4_IF_ID_i;
-                INST_IF_ID_o <= INST_IF_ID_i;        
+                INST_IF_ID_o <= INST_IF_ID_i;
+                btb_redirect_IF_ID_o <= btb_redirect_IF_ID_i;
             end
         end
         

@@ -36,35 +36,41 @@ CPU_SRCS_JAL_OPT    := $(wildcard src/jal_opt_five_stage_cpu/*.v \
                                   src/jal_opt_five_stage_cpu/MEM/*.v \
                                   src/jal_opt_five_stage_cpu/WB/*.v)
 
+# branch predictor of the opt CPU: static | global | bht, and BTB=0|1
+PRED ?= bht
+BTB  ?= 1
+PRED_MODE_static := 0
+PRED_MODE_global := 1
+PRED_MODE_bht    := 2
+ifeq ($(PRED_MODE_$(PRED)),)
+    $(error Unknown PRED '$(PRED)', must be 'static', 'global' or 'bht')
+endif
+
 ifeq ($(CPU_VERSION), basic)
 	CPU_SRCS := $(CPU_SRCS_BASIC)
 else ifeq ($(CPU_VERSION), opt)
 	CPU_SRCS := $(CPU_SRCS_OPT)
+	CPU_DEFINES := +define+CPU_OPT +define+PRED_MODE=$(PRED_MODE_$(PRED)) +define+BTB_EN=$(BTB)
 else ifeq ($(CPU_VERSION), train_fix_forward_bug)
 	CPU_SRCS := $(CPU_SRCS_TRAIN_FIX_FORWARD_BUG)
 else ifeq ($(CPU_VERSION), jal_opt)
 	CPU_SRCS := $(CPU_SRCS_JAL_OPT)
 else 
-    $(error Unknown CPU_VERSION '$(CPU_VERSION)', must be 'basic' or 'opt' or 'train_fix_forward_bug')
+    $(error Unknown CPU_VERSION '$(CPU_VERSION)', must be 'basic', 'opt', 'jal_opt' or 'train_fix_forward_bug')
 endif
 # ==== Build ====
 BUILD     		  	:= obj_dir
 SIM_CHIP  		  	:= $(BUILD)/Vtb_chip
 SIM_AXI           	:= $(BUILD)/Vtb_axi
 SIM_ASYNCFIFO     	:= $(BUILD)/Vtb_asyncfifo
-SIM_ALU          	:= $(BUILD)/Vtb_alu
 
-.PHONY: all run sim_chip clean sim_axi sim_asyncfifo sim_alu
+.PHONY: all run sim_chip clean sim_axi sim_asyncfifo
 
 all: run
 
 $(SIM_CHIP): tb/tb_chip.sv $(CHIP_SRCS) $(L1_CACHE_SRCS) $(CPU_SRCS) | $(BUILD)
 	@echo "[VERILATOR] Compile -> $@"
-	verilator --trace-vcd --binary -j 32 --top-module tb_chip -Isrc/cpu tb/tb_chip.sv $(CHIP_SRCS) $(L1_CACHE_SRCS) $(CPU_SRCS)
-
-$(SIM_ALU): src/cpu/EX/tb_alu.v src/cpu/EX/alu.v | $(BUILD)
-	@echo "[VERILATOR] Compile -> $@"
-	verilator --trace-vcd --binary -j 32 --top-module tb_alu -Isrc/cpu src/cpu/EX/tb_alu.v src/cpu/EX/alu.v
+	verilator --trace-vcd --binary -j 32 $(CPU_DEFINES) --top-module tb_chip -Isrc/cpu tb/tb_chip.sv $(CHIP_SRCS) $(L1_CACHE_SRCS) $(CPU_SRCS)
 
 $(SIM_AXI): tb/tb_axi.sv $(AXI_SRCS) $(ASYNCFIFO_SRCS) $(BUS_INTEGRATE_SRCS) $(MEMORY_SRCS)| $(BUILD)
 	@echo "[VERILATOR] Compile -> $@"
@@ -90,9 +96,6 @@ sim_asyncfifo: $(SIM_ASYNCFIFO)
 	@echo "[VVP] Run -> ./$(SIM_ASYNCFIFO)"
 	./$(SIM_ASYNCFIFO)
 
-sim_alu: $(SIM_ALU)
-	@echo "[VVP] Run -> ./$(SIM_ALU)"
-	./$(SIM_ALU)
 
 run: sim_chip
 

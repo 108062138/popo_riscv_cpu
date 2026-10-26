@@ -21,8 +21,19 @@ module cpu #(
     output wire [3:0] cpu_data_mem_write_strobe
 );
 
+`ifndef PRED_MODE
+`define PRED_MODE 2   // 0: static not-taken, 1: one global 2-bit counter, 2: BHT
+`endif
+`ifndef BTB_EN
+`define BTB_EN 1      // 1: BTB in IF removes the 1-cycle ID redirect for jal / predicted-taken branches
+`endif
+
 wire [INST_ADDR_WIDTH-1:0] PC_plus_4_normal;
 wire [INST_ADDR_WIDTH-1:0] n_PC;
+wire btb_redirect_IF;
+wire [INST_ADDR_WIDTH-1:0] btb_target_IF;
+wire btb_redirect_ID;
+wire guess_taken_ID, guess_taken_EX;
 assign PC_plus_4_normal = PC_plus_4_IF_ID_i;
 
 PC_datapath #( .INST_WIDTH(INST_WIDTH), .INST_ADDR_WIDTH(INST_ADDR_WIDTH)) u_PC_datapath (
@@ -30,12 +41,14 @@ PC_datapath #( .INST_WIDTH(INST_WIDTH), .INST_ADDR_WIDTH(INST_ADDR_WIDTH)) u_PC_
     .early_jal_ID(early_jal_ID),
     .fix_predict_EX(fix_predict_EX),
     .meet_jalr_EX(meet_jalr_EX),
+    .btb_redirect_IF(btb_redirect_IF),
 
     .predict_branch_taken_PC_ID(predict_branch_taken_PC_ID),
     .early_jal_PC_ID(early_jal_PC_ID),
     .PC_plus_4_normal(PC_plus_4_normal),
     .meet_jalr_PC_EX(meet_jalr_PC_EX),
     .fix_predict_PC_EX(fix_predict_PC_EX),
+    .btb_target_IF(btb_target_IF),
 
     .n_PC(n_PC)
 );
@@ -69,7 +82,9 @@ IF_ID_pipeline #( .INST_WIDTH(INST_WIDTH), .INST_ADDR_WIDTH(INST_ADDR_WIDTH)) u_
     .PC_plus_4_IF_ID_i(PC_plus_4_IF_ID_i),
     .PC_plus_4_IF_ID_o(PC_plus_4_IF_ID_o),
     .INST_IF_ID_i(INST),
-    .INST_IF_ID_o(INST_IF_ID_o)
+    .INST_IF_ID_o(INST_IF_ID_o),
+    .btb_redirect_IF_ID_i(btb_redirect_IF),
+    .btb_redirect_IF_ID_o(btb_redirect_ID)
 );
 
 wire [INST_ADDR_WIDTH-1:0] PC_ID;
@@ -119,14 +134,15 @@ ID_datapath #( .INST_WIDTH(INST_WIDTH), .INST_ADDR_WIDTH(INST_ADDR_WIDTH), .DATA
 );
 
 wire [INST_ADDR_WIDTH-1:0] early_jal_PC_ID;
-wire early_jal_ID;
+wire early_jal_raw_ID;
+wire early_jal_ID = early_jal_raw_ID && !btb_redirect_ID;
 
 ID_early_jump #( .INST_WIDTH(INST_WIDTH), .INST_ADDR_WIDTH(INST_ADDR_WIDTH), .DATA_WIDTH(DATA_WIDTH), .DATA_ADDR_WIDTH(DATA_ADDR_WIDTH), .REGISTER_WIDTH(REGISTER_WIDTH), .REGISTER_ADDR_WIDTH(REGISTER_ADDR_WIDTH)) u_ID_early_jump (
     .opcode_ID(opcode_ID),
     .PC_ID(PC_ID),
     .imm_ID(imm_ID),
     .early_jal_PC_ID(early_jal_PC_ID),
-    .early_jal_ID(early_jal_ID)
+    .early_jal_ID(early_jal_raw_ID)
 );
 
 wire [INST_ADDR_WIDTH-1:0] PC_ID_EX_o;
@@ -194,7 +210,9 @@ ID_EX_pipeline #( .INST_WIDTH(INST_WIDTH), .INST_ADDR_WIDTH(INST_ADDR_WIDTH), .D
     .RD1D_ID_EX_o(RD1D_ID_EX_o),
     .RD2D_ID_EX_o(RD2D_ID_EX_o),
     .funct3_ID_EX_o(funct3_ID_EX_o),
-    .opcode_ID_EX_o(opcode_ID_EX_o)
+    .opcode_ID_EX_o(opcode_ID_EX_o),
+    .guess_taken_ID_EX_i(guess_taken_ID),
+    .guess_taken_ID_EX_o(guess_taken_EX)
 );
 
 wire [INST_WIDTH-1:0] INST_EX;
@@ -393,20 +411,30 @@ wire [INST_ADDR_WIDTH-1:0] predict_branch_taken_PC_ID;
 wire fix_predict_EX;
 wire [INST_ADDR_WIDTH-1:0] fix_predict_PC_EX;
 
-branch_prediction #( .INST_WIDTH(INST_WIDTH), .INST_ADDR_WIDTH(INST_ADDR_WIDTH), .DATA_WIDTH(DATA_WIDTH), .DATA_ADDR_WIDTH(DATA_ADDR_WIDTH), .REGISTER_WIDTH(REGISTER_WIDTH), .REGISTER_ADDR_WIDTH(REGISTER_ADDR_WIDTH)) u_branch_detection (
+branch_prediction #(
+    .INST_ADDR_WIDTH(INST_ADDR_WIDTH),
+    .PREDICTOR_MODE(`PRED_MODE),
+    .BTB_ENABLE(`BTB_EN)
+) u_branch_detection (
     .cpu_clk(cpu_clk),
     .cpu_rst_n(cpu_rst_n),
+    .update_en(1'b1),
+    .PC_IF(PC),
+    .btb_redirect_IF(btb_redirect_IF),
+    .btb_target_IF(btb_target_IF),
     .opcode_ID(opcode_ID),
-    .opcode_EX(opcode_EX),
-    .PC_plus_4_ID(PC_plus_4_ID),
     .PC_ID(PC_ID),
     .imm_ID(imm_ID),
+    .btb_redirect_ID(btb_redirect_ID),
+    .guess_taken_ID(guess_taken_ID),
+    .predict_branch_taken_ID(predict_branch_taken_ID),
+    .predict_branch_taken_PC_ID(predict_branch_taken_PC_ID),
+    .opcode_EX(opcode_EX),
     .PC_plus_4_EX(PC_plus_4_EX),
     .PC_EX(PC_EX),
     .imm_EX(imm_EX),
+    .guess_taken_EX(guess_taken_EX),
     .branch_res_EX(branch_res_EX),
-    .predict_branch_taken_ID(predict_branch_taken_ID),
-    .predict_branch_taken_PC_ID(predict_branch_taken_PC_ID),
     .fix_predict_EX(fix_predict_EX),
     .fix_predict_PC_EX(fix_predict_PC_EX)
 );

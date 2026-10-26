@@ -1,3 +1,5 @@
-./build
-./obj_dir
-./sim_out*
+build/
+obj_dir/
+sim_out*/
+*.vcd
+__pycache__/
